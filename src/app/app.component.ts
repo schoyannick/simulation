@@ -4,6 +4,9 @@ import Predator, { PREDATOR_RADIUS } from './objects/predator';
 import Prey, { PREY_RADIUS } from './objects/prey';
 import areCircleColliding from './utils/areCircleColliding';
 
+const PREY_COUNT = 5;
+const PREDATOR_COUNT = 5;
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -23,6 +26,7 @@ export class AppComponent implements OnInit {
     time = 0;
 
     resizeOberserver$!: Observable<Event>;
+    deleteObserver$!: Observable<CustomEvent>;
 
     ngOnInit() {
         this.initListener();
@@ -35,8 +39,8 @@ export class AppComponent implements OnInit {
 
         this.setCanvasDimensions();
 
-        const preys = this.generatePreys();
         const predators = this.generatePredators();
+        const preys = this.generatePreys();
 
         this.objects.push(...preys, ...predators);
 
@@ -47,6 +51,11 @@ export class AppComponent implements OnInit {
         this.resizeOberserver$ = fromEvent(window, 'resize');
         this.resizeOberserver$.subscribe(() => {
             this.setCanvasDimensions();
+        });
+
+        this.deleteObserver$ = fromEvent<CustomEvent>(window, 'destroy');
+        this.deleteObserver$.subscribe((event) => {
+            this.deleteObject(event.detail);
         });
     }
 
@@ -86,10 +95,11 @@ export class AppComponent implements OnInit {
     generatePreys(): Array<Prey> {
         const preys: Array<Prey> = [];
 
-        while (preys.length < 1) {
+        while (preys.length < PREY_COUNT) {
             const prey = new Prey(
                 Math.floor(
-                    Math.random() * (this.width - PREY_RADIUS * 2) + PREY_RADIUS
+                    Math.random() * (this.width / 3 - PREY_RADIUS * 2) +
+                        PREY_RADIUS
                 ),
                 Math.floor(
                     Math.random() * (this.height - PREY_RADIUS * 2) +
@@ -107,11 +117,13 @@ export class AppComponent implements OnInit {
     generatePredators(): Array<Predator> {
         const predators: Array<Predator> = [];
 
-        while (predators.length < 1) {
+        while (predators.length < PREDATOR_COUNT) {
+            const minX = this.width / 2;
             const predator = new Predator(
                 Math.floor(
-                    Math.random() * (this.width - PREDATOR_RADIUS * 2) +
-                        PREDATOR_RADIUS
+                    Math.random() * (minX - PREDATOR_RADIUS * 2) +
+                        PREDATOR_RADIUS +
+                        minX
                 ),
                 Math.floor(
                     Math.random() * (this.height - PREDATOR_RADIUS * 2) +
@@ -124,5 +136,9 @@ export class AppComponent implements OnInit {
         }
 
         return predators;
+    }
+
+    deleteObject(object: Prey | Predator) {
+        this.objects = this.objects.filter((current) => current !== object);
     }
 }

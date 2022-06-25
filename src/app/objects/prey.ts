@@ -4,15 +4,19 @@ import rotateVector from '../utils/rotateVector';
 export const PREY_RADIUS = 15;
 export const PREY_SPEED = 100;
 export const PREY_COLOR = '#03AC12';
+export const PREY_MAX_ENERGY = 50;
 
 class Prey {
     x: number;
     y: number;
     vector: Array<number>;
+    energy: number;
 
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
+
+        this.energy = PREY_MAX_ENERGY;
 
         const randX = Math.random() * 2 - 1;
         const randY = Math.random() * 2 - 1;
@@ -26,6 +30,11 @@ class Prey {
         otherObjects: Array<Prey>
     ): void {
         if (!deltaTime) return;
+
+        this.energy -= 1 / deltaTime;
+        if (this.energy <= 0) {
+            return;
+        }
 
         const movement = (deltaTime / 1000) * PREY_SPEED;
         const newX = this.x + this.vector[0] * movement;
