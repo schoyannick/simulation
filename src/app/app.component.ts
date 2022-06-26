@@ -1,11 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
-import Predator, { PREDATOR_RADIUS } from './objects/predator';
-import Prey, { PREY_RADIUS } from './objects/prey';
-import areCircleColliding from './utils/areCircleColliding';
+import Predator, { PREDATOR_HEIGHT, PREDATOR_WIDTH } from './objects/predator';
+import Prey, { PREY_HEIGHT, PREY_WIDTH } from './objects/prey';
+import areObjectsColliding from './utils/areObjectsColliding';
 
-const PREY_COUNT = 5;
-const PREDATOR_COUNT = 5;
+const PREY_COUNT = 50;
+const PREDATOR_COUNT = 20;
 
 @Component({
     selector: 'app-root',
@@ -32,19 +32,19 @@ export class AppComponent implements OnInit {
         this.initListener();
     }
 
-    ngAfterViewInit(): void {
+    async ngAfterViewInit(): Promise<void> {
         this.ctx = this.canvas.nativeElement.getContext(
             '2d'
         ) as CanvasRenderingContext2D;
 
         this.setCanvasDimensions();
 
-        const predators = this.generatePredators();
-        const preys = this.generatePreys();
-
-        this.objects.push(...preys, ...predators);
-
-        this.loop(0);
+        Promise.all([this.generatePredators(), this.generatePreys()]).then(
+            ([predators, preys]) => {
+                this.objects.push(...preys, ...predators);
+                this.loop(0);
+            }
+        );
     }
 
     initListener() {
@@ -92,21 +92,26 @@ export class AppComponent implements OnInit {
         });
     }
 
-    generatePreys(): Array<Prey> {
+    async generatePreys(): Promise<Array<Prey>> {
+        const preyImage = new Image();
+        preyImage.src = '/assets/prey.png';
+
+        const imageLoaded = new Promise<void>((res) => {
+            preyImage.addEventListener('load', () => {
+                res();
+            });
+        });
+
+        await imageLoaded;
+
         const preys: Array<Prey> = [];
 
         while (preys.length < PREY_COUNT) {
-            const prey = new Prey(
-                Math.floor(
-                    Math.random() * (this.width / 3 - PREY_RADIUS * 2) +
-                        PREY_RADIUS
-                ),
-                Math.floor(
-                    Math.random() * (this.height - PREY_RADIUS * 2) +
-                        PREY_RADIUS
-                )
-            );
-            if (!areCircleColliding(prey.x, prey.y, preys)) {
+            const x = Math.floor(Math.random() * (this.width / 3 - PREY_WIDTH));
+            const y = Math.floor(Math.random() * (this.height - PREY_HEIGHT));
+            const prey = new Prey(x, y, preyImage);
+
+            if (!areObjectsColliding(prey.x, prey.y, preys)) {
                 preys.push(prey);
             }
         }
@@ -114,23 +119,30 @@ export class AppComponent implements OnInit {
         return preys;
     }
 
-    generatePredators(): Array<Predator> {
+    async generatePredators(): Promise<Array<Predator>> {
+        const predatorImage = new Image();
+        predatorImage.src = '/assets/predator.png';
+
+        const imageLoaded = new Promise<void>((res) => {
+            predatorImage.addEventListener('load', () => {
+                res();
+            });
+        });
+
+        await imageLoaded;
+
         const predators: Array<Predator> = [];
 
         while (predators.length < PREDATOR_COUNT) {
             const minX = this.width / 2;
-            const predator = new Predator(
-                Math.floor(
-                    Math.random() * (minX - PREDATOR_RADIUS * 2) +
-                        PREDATOR_RADIUS +
-                        minX
-                ),
-                Math.floor(
-                    Math.random() * (this.height - PREDATOR_RADIUS * 2) +
-                        PREDATOR_RADIUS
-                )
+            const x =
+                Math.floor(Math.random() * (minX + PREDATOR_WIDTH)) + minX;
+            const y = Math.floor(
+                Math.random() * (this.height - PREDATOR_HEIGHT)
             );
-            if (!areCircleColliding(predator.x, predator.y, predators)) {
+
+            const predator = new Predator(x, y, predatorImage);
+            if (!areObjectsColliding(predator.x, predator.y, predators)) {
                 predators.push(predator);
             }
         }

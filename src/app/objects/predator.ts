@@ -1,10 +1,10 @@
-import areCircleColliding from '../utils/areCircleColliding';
+import areObjectsColliding from '../utils/areObjectsColliding';
 import rotateVector from '../utils/rotateVector';
 import Prey from './prey';
 
-export const PREDATOR_RADIUS = 15;
-export const PREDATOR_SPEED = 100;
-export const PREDATOR_COLOR = '#D21404';
+export const PREDATOR_WIDTH = 30;
+export const PREDATOR_HEIGHT = 30;
+export const PREDATOR_SPEED = 150;
 export const PREDATOR_MAX_ENERGY = 50;
 
 class Predator {
@@ -12,10 +12,12 @@ class Predator {
     y: number;
     vector: Array<number>;
     energy: number;
+    image: HTMLImageElement;
 
-    constructor(x: number, y: number) {
+    constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;
         this.y = y;
+        this.image = image;
 
         this.energy = PREDATOR_MAX_ENERGY;
 
@@ -51,18 +53,20 @@ class Predator {
         );
 
         if (
-            newX < 0 + PREDATOR_RADIUS ||
-            newX > width - PREDATOR_RADIUS ||
-            newY < 0 + PREDATOR_RADIUS ||
-            newY > height - PREDATOR_RADIUS ||
-            areCircleColliding(
-                newX,
-                newY,
-                otherObjects.filter(
-                    (object) => object.constructor.name === 'Predator'
-                )
-            )
+            newX < 0 + PREDATOR_WIDTH ||
+            newX > width - PREDATOR_WIDTH ||
+            newY < 0 + PREDATOR_HEIGHT ||
+            newY > height - PREDATOR_HEIGHT
         ) {
+            this.x = Math.min(
+                Math.max(this.x + this.vector[0] * movement, PREDATOR_WIDTH),
+                width - PREDATOR_WIDTH
+            );
+            this.y = Math.min(
+                Math.max(this.y + this.vector[1] * movement, PREDATOR_HEIGHT),
+                height - PREDATOR_HEIGHT
+            );
+
             this.vector = rotateVector(
                 this.vector,
                 Math.floor(Math.random() * 360)
@@ -74,16 +78,19 @@ class Predator {
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
-        ctx.fillStyle = PREDATOR_COLOR;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, PREDATOR_RADIUS, 0, 2 * Math.PI);
-        ctx.fill();
+        ctx.drawImage(
+            this.image,
+            this.x,
+            this.y,
+            PREDATOR_WIDTH,
+            PREDATOR_HEIGHT
+        );
     }
 
     checkForKill(x: number, y: number, preys: Array<Prey>) {
         let didKill = false;
         preys.forEach((prey) => {
-            if (areCircleColliding(x, y, [prey])) {
+            if (areObjectsColliding(x, y, [prey])) {
                 didKill = true;
                 const event = new CustomEvent('destroy', {
                     detail: prey,
