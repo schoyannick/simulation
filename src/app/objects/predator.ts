@@ -5,7 +5,7 @@ import Prey from './prey';
 export const PREDATOR_WIDTH = 30;
 export const PREDATOR_HEIGHT = 30;
 export const PREDATOR_SPEED = 150;
-export const PREDATOR_MAX_ENERGY = 50;
+export const PREDATOR_MAX_ENERGY = 100;
 
 class Predator {
     x: number;
@@ -13,6 +13,8 @@ class Predator {
     vector: Array<number>;
     energy: number;
     image: HTMLImageElement;
+    maxEnergy = PREDATOR_MAX_ENERGY;
+    isResting = false;
 
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;

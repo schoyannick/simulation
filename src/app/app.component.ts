@@ -1,11 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
+import Hud from './objects/hud';
 import Predator, { PREDATOR_HEIGHT, PREDATOR_WIDTH } from './objects/predator';
 import Prey, { PREY_HEIGHT, PREY_WIDTH } from './objects/prey';
 import areObjectsColliding from './utils/areObjectsColliding';
 
-const PREY_COUNT = 50;
-const PREDATOR_COUNT = 20;
+const PREY_COUNT = 3;
+const PREDATOR_COUNT = 3;
 
 @Component({
     selector: 'app-root',
@@ -21,7 +22,8 @@ export class AppComponent implements OnInit {
     height = window.innerHeight - 200;
     width = window.innerWidth - 20;
 
-    objects: Array<Prey> = [];
+    objects: Array<Prey | Predator> = [];
+    hud = new Hud();
 
     time = 0;
 
@@ -38,6 +40,7 @@ export class AppComponent implements OnInit {
         ) as CanvasRenderingContext2D;
 
         this.setCanvasDimensions();
+        this.addClickListener();
 
         Promise.all([this.generatePredators(), this.generatePreys()]).then(
             ([predators, preys]) => {
@@ -56,6 +59,26 @@ export class AppComponent implements OnInit {
         this.deleteObserver$ = fromEvent<CustomEvent>(window, 'destroy');
         this.deleteObserver$.subscribe((event) => {
             this.deleteObject(event.detail);
+        });
+    }
+
+    addClickListener() {
+        this.canvas.nativeElement.addEventListener('click', (event) => {
+            const rect = this.canvas.nativeElement.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const offset = 8;
+            const clickedObject = this.objects.find((obj) => {
+                return (
+                    x > obj.x - offset &&
+                    x < obj.x + PREY_WIDTH + offset &&
+                    y > obj.y - offset &&
+                    y < obj.y + PREY_HEIGHT + offset
+                );
+            });
+
+            this.hud.setActiveObject(clickedObject || null);
         });
     }
 
@@ -84,12 +107,15 @@ export class AppComponent implements OnInit {
             );
             object.update(deltaTime, this.width, this.height, otherObjects);
         });
+        this.hud.update(this.objects);
     }
 
     draw(): void {
         this.objects.forEach((object) => {
             object.draw(this.ctx);
         });
+
+        this.hud.draw(this.ctx);
     }
 
     async generatePreys(): Promise<Array<Prey>> {
@@ -134,9 +160,11 @@ export class AppComponent implements OnInit {
         const predators: Array<Predator> = [];
 
         while (predators.length < PREDATOR_COUNT) {
-            const minX = this.width / 2;
+            const minX = this.width / 2 - 10;
             const x =
-                Math.floor(Math.random() * (minX + PREDATOR_WIDTH)) + minX;
+                Math.floor(
+                    Math.random() * (this.width - minX - PREDATOR_WIDTH)
+                ) + minX;
             const y = Math.floor(
                 Math.random() * (this.height - PREDATOR_HEIGHT)
             );

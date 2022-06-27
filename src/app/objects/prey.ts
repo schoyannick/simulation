@@ -3,7 +3,7 @@ import rotateVector from '../utils/rotateVector';
 export const PREY_WIDTH = 30;
 export const PREY_HEIGHT = 30;
 export const PREY_SPEED = 150;
-export const PREY_MAX_ENERGY = 50;
+export const PREY_MAX_ENERGY = 10;
 
 class Prey {
     x: number;
@@ -11,6 +11,8 @@ class Prey {
     vector: Array<number>;
     energy: number;
     image: HTMLImageElement;
+    maxEnergy = PREY_MAX_ENERGY;
+    isResting = false;
 
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;
@@ -32,10 +34,21 @@ class Prey {
     ): void {
         if (!deltaTime) return;
 
-        this.energy -= 1 / deltaTime;
-        if (this.energy <= 0) {
+        if (this.energy <= 0 && !this.isResting) {
+            this.isResting = true;
             return;
         }
+
+        if (this.isResting && this.energy < this.maxEnergy) {
+            this.energy += 1 / deltaTime;
+            return;
+        }
+
+        if (this.isResting && this.energy >= this.maxEnergy) {
+            this.isResting = false;
+        }
+
+        this.energy -= 1 / deltaTime;
 
         const movement = (deltaTime / 1000) * PREY_SPEED;
         const newX = this.x + this.vector[0] * movement;
