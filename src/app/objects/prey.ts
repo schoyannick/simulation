@@ -1,9 +1,11 @@
+import createObject from '../utils/createObject';
 import rotateVector from '../utils/rotateVector';
 
 export const PREY_WIDTH = 30;
 export const PREY_HEIGHT = 30;
 export const PREY_SPEED = 150;
-export const PREY_MAX_ENERGY = 10;
+export const PREY_MAX_ENERGY = 50;
+export const PREY_SPLIT_TIME = 20;
 
 class Prey {
     x: number;
@@ -13,6 +15,7 @@ class Prey {
     image: HTMLImageElement;
     maxEnergy = PREY_MAX_ENERGY;
     isResting = false;
+    splitTimer: number;
 
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;
@@ -20,6 +23,7 @@ class Prey {
         this.image = image;
 
         this.energy = PREY_MAX_ENERGY;
+        this.splitTimer = PREY_SPLIT_TIME;
 
         const randX = Math.random() * 2 - 1;
         const randY = Math.random() * 2 - 1;
@@ -33,6 +37,23 @@ class Prey {
         otherObjects: Array<Prey>
     ): void {
         if (!deltaTime) return;
+
+        this.splitTimer -= 1 / deltaTime;
+        if (this.splitTimer <= 0) {
+            const offsetX = Math.random() * 20 - 10;
+            const offsety = Math.random() * 20 - 10;
+            const x = Math.min(
+                Math.max(this.x + offsetX, PREY_WIDTH),
+                width - PREY_WIDTH
+            );
+            const y = Math.min(
+                Math.max(this.y + offsety, PREY_HEIGHT),
+                height - PREY_HEIGHT
+            );
+            createObject('prey', x, y, this.image);
+
+            this.splitTimer = PREY_SPLIT_TIME;
+        }
 
         if (this.energy <= 0 && !this.isResting) {
             this.isResting = true;
@@ -55,20 +76,19 @@ class Prey {
         const newY = this.y + this.vector[1] * movement;
 
         if (
-            newX < 0 + PREY_WIDTH ||
+            newX < 0 ||
             newX > width - PREY_WIDTH ||
-            newY < 0 + PREY_HEIGHT ||
+            newY < 0 ||
             newY > height - PREY_HEIGHT
         ) {
             this.x = Math.min(
-                Math.max(this.x + this.vector[0] * movement, PREY_WIDTH),
+                Math.max(this.x + this.vector[0] * movement, 0),
                 width - PREY_WIDTH
             );
             this.y = Math.min(
-                Math.max(this.y + this.vector[1] * movement, PREY_HEIGHT),
+                Math.max(this.y + this.vector[1] * movement, 0),
                 height - PREY_HEIGHT
             );
-
             this.vector = rotateVector(
                 this.vector,
                 Math.floor(Math.random() * 360)

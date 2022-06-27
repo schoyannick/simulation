@@ -1,4 +1,5 @@
 import areObjectsColliding from '../utils/areObjectsColliding';
+import destroyObject from '../utils/destroyObject';
 import rotateVector from '../utils/rotateVector';
 import Prey from './prey';
 
@@ -6,6 +7,7 @@ export const PREDATOR_WIDTH = 30;
 export const PREDATOR_HEIGHT = 30;
 export const PREDATOR_SPEED = 150;
 export const PREDATOR_MAX_ENERGY = 100;
+export const PREDATOR_SPLIT_TIME = 50;
 
 class Predator {
     x: number;
@@ -15,6 +17,7 @@ class Predator {
     image: HTMLImageElement;
     maxEnergy = PREDATOR_MAX_ENERGY;
     isResting = false;
+    splitTimer: number;
 
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;
@@ -22,6 +25,7 @@ class Predator {
         this.image = image;
 
         this.energy = PREDATOR_MAX_ENERGY;
+        this.splitTimer = PREDATOR_SPLIT_TIME;
 
         const randX = Math.random() * 2 - 1;
         const randY = Math.random() * 2 - 1;
@@ -38,10 +42,8 @@ class Predator {
 
         this.energy -= 1 / deltaTime;
         if (this.energy <= 0) {
-            const event = new CustomEvent('destroy', {
-                detail: this,
-            });
-            window.dispatchEvent(event);
+            destroyObject(this);
+            return;
         }
 
         const movement = (deltaTime / 1000) * PREDATOR_SPEED;
@@ -55,17 +57,17 @@ class Predator {
         );
 
         if (
-            newX < 0 + PREDATOR_WIDTH ||
+            newX < 0 ||
             newX > width - PREDATOR_WIDTH ||
-            newY < 0 + PREDATOR_HEIGHT ||
+            newY < 0 ||
             newY > height - PREDATOR_HEIGHT
         ) {
             this.x = Math.min(
-                Math.max(this.x + this.vector[0] * movement, PREDATOR_WIDTH),
+                Math.max(this.x + this.vector[0] * movement, 0),
                 width - PREDATOR_WIDTH
             );
             this.y = Math.min(
-                Math.max(this.y + this.vector[1] * movement, PREDATOR_HEIGHT),
+                Math.max(this.y + this.vector[1] * movement, 0),
                 height - PREDATOR_HEIGHT
             );
 
@@ -94,10 +96,7 @@ class Predator {
         preys.forEach((prey) => {
             if (areObjectsColliding(x, y, [prey])) {
                 didKill = true;
-                const event = new CustomEvent('destroy', {
-                    detail: prey,
-                });
-                window.dispatchEvent(event);
+                destroyObject(prey);
             }
         });
 

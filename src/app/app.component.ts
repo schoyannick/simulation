@@ -3,10 +3,9 @@ import { fromEvent, Observable } from 'rxjs';
 import Hud from './objects/hud';
 import Predator, { PREDATOR_HEIGHT, PREDATOR_WIDTH } from './objects/predator';
 import Prey, { PREY_HEIGHT, PREY_WIDTH } from './objects/prey';
-import areObjectsColliding from './utils/areObjectsColliding';
 
-const PREY_COUNT = 3;
-const PREDATOR_COUNT = 3;
+const PREY_COUNT = 10;
+const PREDATOR_COUNT = 10;
 
 @Component({
     selector: 'app-root',
@@ -29,6 +28,7 @@ export class AppComponent implements OnInit {
 
     resizeOberserver$!: Observable<Event>;
     deleteObserver$!: Observable<CustomEvent>;
+    createObserver$!: Observable<CustomEvent>;
 
     ngOnInit() {
         this.initListener();
@@ -59,6 +59,11 @@ export class AppComponent implements OnInit {
         this.deleteObserver$ = fromEvent<CustomEvent>(window, 'destroy');
         this.deleteObserver$.subscribe((event) => {
             this.deleteObject(event.detail);
+        });
+
+        this.createObserver$ = fromEvent<CustomEvent>(window, 'create');
+        this.createObserver$.subscribe((event) => {
+            this.createObject(event.detail);
         });
     }
 
@@ -136,10 +141,7 @@ export class AppComponent implements OnInit {
             const x = Math.floor(Math.random() * (this.width / 3 - PREY_WIDTH));
             const y = Math.floor(Math.random() * (this.height - PREY_HEIGHT));
             const prey = new Prey(x, y, preyImage);
-
-            if (!areObjectsColliding(prey.x, prey.y, preys)) {
-                preys.push(prey);
-            }
+            preys.push(prey);
         }
 
         return preys;
@@ -170,9 +172,7 @@ export class AppComponent implements OnInit {
             );
 
             const predator = new Predator(x, y, predatorImage);
-            if (!areObjectsColliding(predator.x, predator.y, predators)) {
-                predators.push(predator);
-            }
+            predators.push(predator);
         }
 
         return predators;
@@ -180,5 +180,9 @@ export class AppComponent implements OnInit {
 
     deleteObject(object: Prey | Predator) {
         this.objects = this.objects.filter((current) => current !== object);
+    }
+
+    createObject(object: Prey | Predator) {
+        this.objects.push(object);
     }
 }
