@@ -4,8 +4,8 @@ import Hud from './objects/hud';
 import Predator, { PREDATOR_HEIGHT, PREDATOR_WIDTH } from './objects/predator';
 import Prey, { PREY_HEIGHT, PREY_WIDTH } from './objects/prey';
 
-const PREY_COUNT = 10;
-const PREDATOR_COUNT = 10;
+const PREY_COUNT = 5;
+const PREDATOR_COUNT = 5;
 
 @Component({
     selector: 'app-root',

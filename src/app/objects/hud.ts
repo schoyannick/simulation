@@ -53,12 +53,12 @@ class Hud {
     draw(ctx: CanvasRenderingContext2D) {
         if (this.object) {
             ctx.beginPath();
-            ctx.rect(0, 0, 100, 100);
+            ctx.rect(0, 0, 100, 80);
             ctx.fillStyle = '#fff';
             ctx.fill();
 
             ctx.beginPath();
-            ctx.rect(0, 0, 100, 100);
+            ctx.rect(0, 0, 100, 80);
             ctx.stroke();
 
             this.drawHealthbar(ctx);

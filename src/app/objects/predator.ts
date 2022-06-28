@@ -7,7 +7,7 @@ import Prey from './prey';
 export const PREDATOR_WIDTH = 30;
 export const PREDATOR_HEIGHT = 30;
 export const PREDATOR_SPEED = 150;
-export const PREDATOR_MAX_ENERGY = 100;
+export const PREDATOR_MAX_ENERGY = 50;
 export const PREDATOR_SPLIT_TIME = 20;
 
 class Predator {
@@ -120,7 +120,7 @@ class Predator {
 
         if (killCount) {
             this.energy = PREDATOR_MAX_ENERGY;
-            this.splitTimer -= (PREDATOR_SPLIT_TIME / 2) * killCount;
+            this.splitTimer -= (PREDATOR_SPLIT_TIME / 3) * killCount;
         }
     }
 }

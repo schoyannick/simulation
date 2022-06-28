@@ -4,8 +4,8 @@ import rotateVector from '../utils/rotateVector';
 export const PREY_WIDTH = 30;
 export const PREY_HEIGHT = 30;
 export const PREY_SPEED = 150;
-export const PREY_MAX_ENERGY = 50;
-export const PREY_SPLIT_TIME = 20;
+export const PREY_MAX_ENERGY = 80;
+export const PREY_SPLIT_TIME = 10;
 
 class Prey {
     x: number;
