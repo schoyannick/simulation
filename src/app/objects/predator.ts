@@ -1,4 +1,5 @@
 import areObjectsColliding from '../utils/areObjectsColliding';
+import createObject from '../utils/createObject';
 import destroyObject from '../utils/destroyObject';
 import rotateVector from '../utils/rotateVector';
 import Prey from './prey';
@@ -7,7 +8,7 @@ export const PREDATOR_WIDTH = 30;
 export const PREDATOR_HEIGHT = 30;
 export const PREDATOR_SPEED = 150;
 export const PREDATOR_MAX_ENERGY = 100;
-export const PREDATOR_SPLIT_TIME = 50;
+export const PREDATOR_SPLIT_TIME = 20;
 
 class Predator {
     x: number;
@@ -18,6 +19,7 @@ class Predator {
     maxEnergy = PREDATOR_MAX_ENERGY;
     isResting = false;
     splitTimer: number;
+    maxSplitTimer = PREDATOR_SPLIT_TIME;
 
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;
@@ -44,6 +46,22 @@ class Predator {
         if (this.energy <= 0) {
             destroyObject(this);
             return;
+        }
+
+        if (this.splitTimer <= 0) {
+            const offsetX = Math.random() * 20 - 10;
+            const offsety = Math.random() * 20 - 10;
+            const x = Math.min(
+                Math.max(this.x + offsetX, PREDATOR_WIDTH),
+                width - PREDATOR_WIDTH
+            );
+            const y = Math.min(
+                Math.max(this.y + offsety, PREDATOR_HEIGHT),
+                height - PREDATOR_HEIGHT
+            );
+            createObject('predator', x, y, this.image);
+
+            this.splitTimer = PREDATOR_SPLIT_TIME;
         }
 
         const movement = (deltaTime / 1000) * PREDATOR_SPEED;
@@ -92,16 +110,17 @@ class Predator {
     }
 
     checkForKill(x: number, y: number, preys: Array<Prey>) {
-        let didKill = false;
+        let killCount = 0;
         preys.forEach((prey) => {
             if (areObjectsColliding(x, y, [prey])) {
-                didKill = true;
+                killCount++;
                 destroyObject(prey);
             }
         });
 
-        if (didKill) {
+        if (killCount) {
             this.energy = PREDATOR_MAX_ENERGY;
+            this.splitTimer -= (PREDATOR_SPLIT_TIME / 2) * killCount;
         }
     }
 }
