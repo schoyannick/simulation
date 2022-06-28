@@ -16,6 +16,7 @@ class Prey {
     maxEnergy = PREY_MAX_ENERGY;
     isResting = false;
     splitTimer: number;
+    maxSplitTimer = PREY_SPLIT_TIME;
 
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;

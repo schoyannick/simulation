@@ -1,6 +1,9 @@
 import Predator from './predator';
 import Prey from './prey';
 
+const BAR_X_POSITION = 10;
+const BAR_HEIGHT = 20;
+
 class Hud {
     object: Prey | Predator | null = null;
 
@@ -12,11 +15,11 @@ class Hud {
 
     private drawHealthbar(ctx: CanvasRenderingContext2D) {
         if (this.object) {
-            ctx.rect(10, 10, 80, 20);
+            ctx.rect(BAR_X_POSITION, 10, 80, BAR_HEIGHT);
             ctx.stroke();
             const percentHealth = this.object.energy / this.object.maxEnergy;
             ctx.fillStyle = 'rgb(0, 255, 0)';
-            ctx.fillRect(10, 10, 80 * percentHealth, 20);
+            ctx.fillRect(BAR_X_POSITION, 10, 80 * percentHealth, BAR_HEIGHT);
 
             ctx.fillStyle = '#000';
             ctx.font = '15px Roboto';
@@ -24,6 +27,26 @@ class Hud {
             const text =
                 this.object.constructor.name === 'Prey' ? 'Energy' : 'HP';
             ctx.fillText(text, 50, 25);
+        }
+    }
+
+    drawSplitTimeBar(ctx: CanvasRenderingContext2D) {
+        if (this.object) {
+            ctx.rect(BAR_X_POSITION, 40, 80, BAR_HEIGHT);
+            ctx.stroke();
+            const splitTimePercent =
+                1 - this.object.splitTimer / this.object.maxSplitTimer;
+            ctx.fillStyle =
+                this.object.constructor.name === 'Prey'
+                    ? 'rgb(0, 255, 0)'
+                    : 'rgb(255, 0, 0)';
+            ctx.fillRect(BAR_X_POSITION, 40, 80 * splitTimePercent, BAR_HEIGHT);
+
+            ctx.fillStyle = '#000';
+            ctx.font = '15px Roboto';
+            ctx.textAlign = 'center';
+            const text = 'Split';
+            ctx.fillText(text, 50, 55);
         }
     }
 
@@ -39,6 +62,8 @@ class Hud {
             ctx.stroke();
 
             this.drawHealthbar(ctx);
+
+            this.drawSplitTimeBar(ctx);
         }
     }
 
