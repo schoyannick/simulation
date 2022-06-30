@@ -18,8 +18,8 @@ export class AppComponent implements OnInit {
 
     ctx!: CanvasRenderingContext2D;
 
-    height = window.innerHeight - 200;
-    width = window.innerWidth - 20;
+    height = window.innerHeight - 100;
+    width = window.innerWidth - 40;
 
     objects: Array<Prey | Predator> = [];
     hud = new Hud();
@@ -99,8 +99,8 @@ export class AppComponent implements OnInit {
     }
 
     setCanvasDimensions(): void {
-        this.height = window.innerHeight - 50;
-        this.width = window.innerWidth - 20;
+        this.height = window.innerHeight - 100;
+        this.width = window.innerWidth - 40;
         this.canvas.nativeElement.height = this.height;
         this.canvas.nativeElement.width = this.width;
     }

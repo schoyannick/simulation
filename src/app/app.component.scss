@@ -1,3 +1,13 @@
+.headline {
+    text-align: center;
+}
+
+.canvas-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #canvas {
     border: 1px solid black;
 }
