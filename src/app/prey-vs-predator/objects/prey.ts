@@ -1,4 +1,4 @@
-import createObject from '../utils/createObject';
+import { createPrey } from '../utils/createObject';
 import rotateVector from '../utils/rotateVector';
 
 export const PREY_WIDTH = 30;
@@ -31,12 +31,7 @@ class Prey {
         this.vector = [randX, randY];
     }
 
-    update(
-        deltaTime: number,
-        width: number,
-        height: number,
-        otherObjects: Array<Prey>
-    ): void {
+    update(deltaTime: number, width: number, height: number): void {
         if (!deltaTime) return;
 
         this.splitTimer -= 1 / deltaTime;
@@ -51,7 +46,7 @@ class Prey {
                 Math.max(this.y + offsety, PREY_HEIGHT),
                 height - PREY_HEIGHT
             );
-            createObject('prey', x, y, this.image);
+            createPrey(x, y, this.image);
 
             this.splitTimer = PREY_SPLIT_TIME;
         }

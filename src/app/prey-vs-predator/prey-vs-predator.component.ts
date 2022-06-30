@@ -21,14 +21,20 @@ export class PreyVsPredatorComponent implements OnInit {
     height = window.innerHeight - 100;
     width = window.innerWidth - 40;
 
-    objects: Array<Prey | Predator> = [];
+    preys: Array<Prey> = [];
+    predators: Array<Predator> = [];
+
     hud = new Hud();
 
     time = 0;
 
     resizeOberserver$!: Observable<Event>;
-    deleteObserver$!: Observable<CustomEvent>;
-    createObserver$!: Observable<CustomEvent>;
+
+    destroyPreyObserver$!: Observable<CustomEvent>;
+    destroyPredatorObserver$!: Observable<CustomEvent>;
+
+    createPreyObserver$!: Observable<CustomEvent>;
+    createPredatorObserver$!: Observable<CustomEvent>;
 
     ngOnInit() {
         this.initListener();
@@ -44,7 +50,8 @@ export class PreyVsPredatorComponent implements OnInit {
 
         Promise.all([this.generatePredators(), this.generatePreys()]).then(
             ([predators, preys]) => {
-                this.objects.push(...preys, ...predators);
+                this.preys.push(...preys);
+                this.predators.push(...predators);
                 this.loop(0);
             }
         );
@@ -56,25 +63,45 @@ export class PreyVsPredatorComponent implements OnInit {
             this.setCanvasDimensions();
         });
 
-        this.deleteObserver$ = fromEvent<CustomEvent>(window, 'destroy');
-        this.deleteObserver$.subscribe((event) => {
-            this.deleteObject(event.detail);
+        this.createPreyObserver$ = fromEvent<CustomEvent>(window, 'createPrey');
+        this.createPreyObserver$.subscribe((event) => {
+            this.createPrey(event.detail);
         });
 
-        this.createObserver$ = fromEvent<CustomEvent>(window, 'create');
-        this.createObserver$.subscribe((event) => {
-            this.createObject(event.detail);
+        this.createPredatorObserver$ = fromEvent<CustomEvent>(
+            window,
+            'createPredator'
+        );
+        this.createPredatorObserver$.subscribe((event) => {
+            this.createPredator(event.detail);
+        });
+
+        this.destroyPreyObserver$ = fromEvent<CustomEvent>(
+            window,
+            'destroyPrey'
+        );
+        this.destroyPreyObserver$.subscribe((event) => {
+            this.destroyPrey(event.detail);
+        });
+
+        this.destroyPredatorObserver$ = fromEvent<CustomEvent>(
+            window,
+            'destroyPredator'
+        );
+        this.destroyPredatorObserver$.subscribe((event) => {
+            this.destroyPredator(event.detail);
         });
     }
 
     addClickListener() {
         this.canvas.nativeElement.addEventListener('click', (event) => {
+            const preysAndPredators = [...this.preys, ...this.predators];
             const rect = this.canvas.nativeElement.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
             const offset = 8;
-            const clickedObject = this.objects.find((obj) => {
+            const clickedObject = preysAndPredators.find((obj) => {
                 return (
                     x > obj.x - offset &&
                     x < obj.x + PREY_WIDTH + offset &&
@@ -106,18 +133,25 @@ export class PreyVsPredatorComponent implements OnInit {
     }
 
     update(deltaTime: number): void {
-        this.objects.forEach((object) => {
-            const otherObjects = this.objects.filter(
-                (current) => current !== object
-            );
-            object.update(deltaTime, this.width, this.height, otherObjects);
+        this.preys.forEach((prey) => {
+            prey.update(deltaTime, this.width, this.height);
         });
-        this.hud.update(this.objects);
+
+        this.predators.forEach((predator) => {
+            predator.update(deltaTime, this.width, this.height, this.preys);
+        });
+
+        const preysAndPredators = [...this.preys, ...this.predators];
+        this.hud.update(preysAndPredators);
     }
 
     draw(): void {
-        this.objects.forEach((object) => {
-            object.draw(this.ctx);
+        this.preys.forEach((prey) => {
+            prey.draw(this.ctx);
+        });
+
+        this.predators.forEach((predator) => {
+            predator.draw(this.ctx);
         });
 
         this.hud.draw(this.ctx);
@@ -178,11 +212,21 @@ export class PreyVsPredatorComponent implements OnInit {
         return predators;
     }
 
-    deleteObject(object: Prey | Predator) {
-        this.objects = this.objects.filter((current) => current !== object);
+    createPrey(prey: Prey) {
+        this.preys.push(prey);
     }
 
-    createObject(object: Prey | Predator) {
-        this.objects.push(object);
+    createPredator(predator: Predator) {
+        this.predators.push(predator);
+    }
+
+    destroyPrey(prey: Prey) {
+        this.preys = this.preys.filter((current) => current !== prey);
+    }
+
+    destroyPredator(predator: Predator) {
+        this.predators = this.predators.filter(
+            (current) => current !== predator
+        );
     }
 }

@@ -1,24 +1,22 @@
 import Predator from '../objects/predator';
 import Prey from '../objects/prey';
 
-function createObject(
-    type: 'prey' | 'predator',
-    x: number,
-    y: number,
-    image: HTMLImageElement
-) {
-    let object = null;
+function createPrey(x: number, y: number, image: HTMLImageElement) {
+    const prey = new Prey(x, y, image);
 
-    if (type === 'prey') {
-        object = new Prey(x, y, image);
-    } else {
-        object = new Predator(x, y, image);
-    }
-
-    const event = new CustomEvent('create', {
-        detail: object,
+    const event = new CustomEvent('createPrey', {
+        detail: prey,
     });
     window.dispatchEvent(event);
 }
 
-export default createObject;
+function createPredator(x: number, y: number, image: HTMLImageElement) {
+    const predator = new Predator(x, y, image);
+
+    const event = new CustomEvent('createPredator', {
+        detail: predator,
+    });
+    window.dispatchEvent(event);
+}
+
+export { createPrey, createPredator };

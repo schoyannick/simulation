@@ -1,6 +1,6 @@
 import areObjectsColliding from '../utils/areObjectsColliding';
-import createObject from '../utils/createObject';
-import destroyObject from '../utils/destroyObject';
+import { destroyPredator, destroyPrey } from '../utils/destroyObject';
+import { createPredator } from '../utils/createObject';
 import rotateVector from '../utils/rotateVector';
 import Prey from './prey';
 
@@ -17,7 +17,6 @@ class Predator {
     energy: number;
     image: HTMLImageElement;
     maxEnergy = PREDATOR_MAX_ENERGY;
-    isResting = false;
     splitTimer: number;
     maxSplitTimer = PREDATOR_SPLIT_TIME;
 
@@ -38,13 +37,13 @@ class Predator {
         deltaTime: number,
         width: number,
         height: number,
-        otherObjects: Array<Predator | Prey>
+        preys: Array<Prey>
     ): void {
         if (!deltaTime) return;
 
         this.energy -= 1 / deltaTime;
         if (this.energy <= 0) {
-            destroyObject(this);
+            destroyPredator(this);
             return;
         }
 
@@ -59,7 +58,7 @@ class Predator {
                 Math.max(this.y + offsety, PREDATOR_HEIGHT),
                 height - PREDATOR_HEIGHT
             );
-            createObject('predator', x, y, this.image);
+            createPredator(x, y, this.image);
 
             this.splitTimer = PREDATOR_SPLIT_TIME;
         }
@@ -68,11 +67,7 @@ class Predator {
         const newX = this.x + this.vector[0] * movement;
         const newY = this.y + this.vector[1] * movement;
 
-        this.checkForKill(
-            newX,
-            newY,
-            otherObjects.filter((object) => object.constructor.name === 'Prey')
-        );
+        this.checkForKill(newX, newY, preys);
 
         if (
             newX < 0 ||
@@ -114,7 +109,7 @@ class Predator {
         preys.forEach((prey) => {
             if (areObjectsColliding(x, y, [prey])) {
                 killCount++;
-                destroyObject(prey);
+                destroyPrey(prey);
             }
         });
 
