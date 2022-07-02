@@ -12,6 +12,7 @@ class StartScreen {
     }
 
     draw(ctx: CanvasRenderingContext2D, width: number, height: number) {
+        ctx.strokeStyle = '#000000';
         ctx.font = '35px Roboto';
         ctx.textAlign = 'center';
 

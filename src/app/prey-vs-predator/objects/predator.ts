@@ -1,7 +1,6 @@
 import areObjectsColliding from '../utils/areObjectsColliding';
 import { destroyPredator, destroyPrey } from '../utils/destroyObject';
 import { createPredator } from '../utils/createObject';
-import rotateVector from '../utils/rotateVector';
 import Prey from './prey';
 import {
     PREDATOR_HEIGHT,
@@ -9,7 +8,12 @@ import {
     PREDATOR_SPEED,
     PREDATOR_SPLIT_TIME,
     PREDATOR_WIDTH,
+    PREY_HEIGHT,
+    PREY_WIDTH,
 } from '../constants/constants';
+import calculateRays from './calculateRays';
+import isLineColliding from '../utils/isLineColliding';
+import { isDebugModeEnabled } from '../utils/addDebugListener';
 
 class Predator {
     x: number;
@@ -23,6 +27,8 @@ class Predator {
 
     angle: number;
 
+    rays: Array<Array<number>> = [];
+
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;
         this.y = y;
@@ -31,7 +37,8 @@ class Predator {
         this.energy = PREDATOR_MAX_ENERGY;
         this.splitTimer = PREDATOR_SPLIT_TIME;
 
-        this.angle = Math.floor(Math.random() * 360);
+        // this.angle = Math.floor(Math.random() * 360);
+        this.angle = 0;
     }
 
     update(
@@ -71,6 +78,10 @@ class Predator {
 
         this.checkForKill(newX, newY, preys);
 
+        this.rays = calculateRays(this.angle, newX, newY);
+
+        this.targetPrey(newX, newY, preys);
+
         if (
             newX < 0 ||
             newX > width - PREDATOR_WIDTH ||
@@ -86,7 +97,7 @@ class Predator {
         }
     }
 
-    draw(ctx: CanvasRenderingContext2D): void {
+    draw(ctx: CanvasRenderingContext2D, preys: Array<Prey>): void {
         ctx.drawImage(
             this.image,
             this.x,
@@ -94,6 +105,45 @@ class Predator {
             PREDATOR_WIDTH,
             PREDATOR_HEIGHT
         );
+
+        if (isDebugModeEnabled) {
+            this.rays.forEach(([x, y]) => {
+                ctx.beginPath();
+                const startX = this.x + PREY_WIDTH / 2;
+                const startY = this.y + PREY_HEIGHT / 2;
+                const isColliding =
+                    isLineColliding(startX, startY, x, y, preys) !== -1;
+                ctx.strokeStyle = isColliding
+                    ? 'rgb(255, 0,0)'
+                    : 'rgb(0,255,0)';
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            });
+        }
+    }
+
+    targetPrey(newX: number, newY: number, preys: Array<Prey>) {
+        for (let i = 0; i < this.rays.length; i++) {
+            const [x, y] = this.rays[i];
+            const startX = newX + PREDATOR_WIDTH / 2;
+            const startY = newY + PREDATOR_HEIGHT / 2;
+            const collidingIndex = isLineColliding(startX, startY, x, y, preys);
+
+            if (collidingIndex > -1) {
+                let radiant = Math.atan2(
+                    preys[collidingIndex].y - newY,
+                    preys[collidingIndex].x - newX
+                );
+                if (radiant < 0) {
+                    radiant = Math.abs(radiant);
+                } else {
+                    radiant = 2 * Math.PI - radiant;
+                }
+                this.angle = radiant * (180 / Math.PI);
+                return;
+            }
+        }
     }
 
     checkForKill(x: number, y: number, preys: Array<Prey>) {

@@ -10,7 +10,7 @@ import addDebugListener from './utils/addDebugListener';
 import { generatePredators, generatePreys } from './utils/generateObjects';
 
 const PREY_COUNT = 10;
-const PREDATOR_COUNT = 3;
+const PREDATOR_COUNT = 10;
 
 enum SimulationState {
     initial,
@@ -150,7 +150,9 @@ export class PreyVsPredatorComponent implements OnInit {
         this.time = timestamp;
 
         this.update(deltaTime);
+
         this.draw();
+
         requestAnimationFrame(this.loop.bind(this));
     }
 
@@ -166,13 +168,13 @@ export class PreyVsPredatorComponent implements OnInit {
             // Predators won
             if (this.preys.length === 0) {
                 this.simulationState = SimulationState.ended;
-                this.endScreen.update(this.width, this.height, 'Predator');
+                return;
             }
 
             // Preys won
             if (this.predators.length === 0) {
-                this.endScreen.update(this.width, this.height, 'Prey');
                 this.simulationState = SimulationState.ended;
+                return;
             }
 
             this.preys.forEach((prey) => {
@@ -187,6 +189,12 @@ export class PreyVsPredatorComponent implements OnInit {
             this.hud.update(preysAndPredators);
         } else if (this.simulationState === SimulationState.initial) {
             this.startScreen.update(this.width, this.height);
+        } else if (this.simulationState === SimulationState.ended) {
+            this.endScreen.update(
+                this.width,
+                this.height,
+                this.preys.length === 0 ? 'Predator' : 'Prey'
+            );
         }
     }
 
@@ -202,7 +210,7 @@ export class PreyVsPredatorComponent implements OnInit {
                 });
 
                 this.predators.forEach((predator) => {
-                    predator.draw(this.ctx);
+                    predator.draw(this.ctx, this.preys);
                 });
 
                 this.hud.draw(this.ctx);

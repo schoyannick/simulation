@@ -16,6 +16,8 @@ class EndScreen {
     }
 
     draw(ctx: CanvasRenderingContext2D, width: number, height: number) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000000';
         ctx.font = '35px Roboto';
         ctx.textAlign = 'center';
 

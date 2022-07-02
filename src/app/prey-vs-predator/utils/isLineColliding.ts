@@ -31,7 +31,7 @@ const isLineColliding = (
     endX: number,
     endY: number,
     objects: Array<Prey | Predator>
-): boolean => {
+): number => {
     for (let i = 0; i < objects.length; i++) {
         const obj = objects[i];
         const left = isLineCollidingHelper(
@@ -76,11 +76,11 @@ const isLineColliding = (
         );
 
         if (left || right || top || bottom) {
-            return true;
+            return i;
         }
     }
 
-    return false;
+    return -1;
 };
 
 export default isLineColliding;

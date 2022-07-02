@@ -8,6 +8,7 @@ import {
 import { isDebugModeEnabled } from '../utils/addDebugListener';
 import { createPrey } from '../utils/createObject';
 import isLineColliding from '../utils/isLineColliding';
+import calculateRays from './calculateRays';
 import Predator from './predator';
 
 class Prey {
@@ -65,7 +66,7 @@ class Prey {
         const newX = this.x + Math.cos(radiant) * movement;
         const newY = this.y + Math.sin(radiant) * movement;
 
-        this.calculateRays();
+        this.rays = calculateRays(this.angle, newX, newY);
 
         if (this.isInThreat(newX, newY, predators)) {
             this.angle += 180 % 360;
@@ -90,23 +91,8 @@ class Prey {
         return this.rays.some(([x, y]) => {
             const startX = newX + PREY_WIDTH / 2;
             const startY = newY + PREY_HEIGHT / 2;
-            return isLineColliding(startX, startY, x, y, predators);
+            return isLineColliding(startX, startY, x, y, predators) !== -1;
         });
-    }
-
-    calculateRays() {
-        this.rays = [];
-        const maxRays = 50;
-        for (
-            let angle = this.angle - maxRays / 2;
-            angle < this.angle + maxRays / 2;
-            angle = angle + 2
-        ) {
-            const radiant = -angle * (Math.PI / 180);
-            const newX = this.x + Math.cos(radiant) * 150;
-            const newY = this.y + Math.sin(radiant) * 150;
-            this.rays.push([newX, newY]);
-        }
     }
 
     draw(ctx: CanvasRenderingContext2D, predators: Array<Predator>): void {
@@ -117,13 +103,8 @@ class Prey {
                 ctx.beginPath();
                 const startX = this.x + PREY_WIDTH / 2;
                 const startY = this.y + PREY_HEIGHT / 2;
-                const isColliding = isLineColliding(
-                    startX,
-                    startY,
-                    x,
-                    y,
-                    predators
-                );
+                const isColliding =
+                    isLineColliding(startX, startY, x, y, predators) !== -1;
                 ctx.strokeStyle = isColliding
                     ? 'rgb(255, 0,0)'
                     : 'rgb(0,255,0)';
