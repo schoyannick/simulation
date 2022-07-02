@@ -246,9 +246,25 @@ export class PreyVsPredatorComponent implements OnInit {
     }
 
     async generatePreysAndPredators(): Promise<void> {
+        const spriteSheet = new Image();
+        spriteSheet.src = '/assets/spritesheet.png';
+
+        const spriteSheetLoaded = new Promise<void>((res) => {
+            spriteSheet.addEventListener('load', () => {
+                res();
+            });
+        });
+
+        await spriteSheetLoaded;
+
         await Promise.all([
-            generatePredators(PREDATOR_COUNT, this.width, this.height),
-            generatePreys(PREY_COUNT, this.width, this.height),
+            generatePredators(
+                PREDATOR_COUNT,
+                this.width,
+                this.height,
+                spriteSheet
+            ),
+            generatePreys(PREY_COUNT, this.width, this.height, spriteSheet),
         ]).then(([predators, preys]) => {
             this.preys.push(...preys);
             this.predators.push(...predators);

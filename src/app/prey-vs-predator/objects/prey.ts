@@ -3,6 +3,7 @@ import {
     PREY_MAX_ENERGY,
     PREY_SPEED,
     PREY_SPLIT_TIME,
+    PREY_SPRITE_SHEET_POS,
     PREY_WIDTH,
 } from '../constants/constants';
 import { isDebugModeEnabled } from '../utils/addDebugListener';
@@ -96,7 +97,22 @@ class Prey {
     }
 
     draw(ctx: CanvasRenderingContext2D, predators: Array<Predator>): void {
-        ctx.drawImage(this.image, this.x, this.y, PREY_WIDTH, PREY_HEIGHT);
+        const sprite =
+            this.angle <= 90 || this.angle >= 270
+                ? PREY_SPRITE_SHEET_POS.right
+                : PREY_SPRITE_SHEET_POS.left;
+
+        ctx.drawImage(
+            this.image,
+            sprite.x,
+            sprite.y,
+            sprite.width,
+            sprite.height,
+            this.x,
+            this.y,
+            PREY_WIDTH,
+            PREY_HEIGHT
+        );
 
         if (isDebugModeEnabled) {
             this.rays.forEach(([x, y]) => {

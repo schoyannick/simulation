@@ -7,6 +7,7 @@ import {
     PREDATOR_MAX_ENERGY,
     PREDATOR_SPEED,
     PREDATOR_SPLIT_TIME,
+    PREDATOR_SPRITE_SHEET_POS,
     PREDATOR_WIDTH,
     PREY_HEIGHT,
     PREY_WIDTH,
@@ -98,8 +99,17 @@ class Predator {
     }
 
     draw(ctx: CanvasRenderingContext2D, preys: Array<Prey>): void {
+        const sprite =
+            this.angle <= 90 || this.angle >= 270
+                ? PREDATOR_SPRITE_SHEET_POS.right
+                : PREDATOR_SPRITE_SHEET_POS.left;
+
         ctx.drawImage(
             this.image,
+            sprite.x,
+            sprite.y,
+            sprite.width,
+            sprite.height,
             this.x,
             this.y,
             PREDATOR_WIDTH,

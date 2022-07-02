@@ -10,25 +10,15 @@ import Prey from '../objects/prey';
 async function generatePreys(
     amount: number,
     width: number,
-    height: number
+    height: number,
+    spriteSheet: HTMLImageElement
 ): Promise<Array<Prey>> {
-    const preyImage = new Image();
-    preyImage.src = '/assets/prey.png';
-
-    const imageLoaded = new Promise<void>((res) => {
-        preyImage.addEventListener('load', () => {
-            res();
-        });
-    });
-
-    await imageLoaded;
-
     const preys: Array<Prey> = [];
 
     while (preys.length < amount) {
         const x = Math.floor(Math.random() * (width / 3 - PREY_WIDTH));
         const y = Math.floor(Math.random() * (height - PREY_HEIGHT));
-        const prey = new Prey(x, y, preyImage);
+        const prey = new Prey(x, y, spriteSheet);
         preys.push(prey);
     }
 
@@ -38,19 +28,9 @@ async function generatePreys(
 async function generatePredators(
     amount: number,
     width: number,
-    height: number
+    height: number,
+    spriteSheet: HTMLImageElement
 ): Promise<Array<Predator>> {
-    const predatorImage = new Image();
-    predatorImage.src = '/assets/predator.png';
-
-    const imageLoaded = new Promise<void>((res) => {
-        predatorImage.addEventListener('load', () => {
-            res();
-        });
-    });
-
-    await imageLoaded;
-
     const predators: Array<Predator> = [];
 
     while (predators.length < amount) {
@@ -59,7 +39,7 @@ async function generatePredators(
             Math.floor(Math.random() * (width - minX - PREDATOR_WIDTH)) + minX;
         const y = Math.floor(Math.random() * (height - PREDATOR_HEIGHT));
 
-        const predator = new Predator(x, y, predatorImage);
+        const predator = new Predator(x, y, spriteSheet);
         predators.push(predator);
     }
 
