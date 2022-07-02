@@ -2,10 +2,9 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
 import EndScreen from './objects/endScreen';
 import Hud from './objects/hud';
-import Predator, { PREDATOR_HEIGHT, PREDATOR_WIDTH } from './objects/predator';
+import Predator from './objects/predator';
 import Prey, { PREY_HEIGHT, PREY_WIDTH } from './objects/prey';
 import StartScreen from './objects/startScreen';
-import drawStartScreen from './objects/startScreen';
 import { generatePredators, generatePreys } from './utils/generateObjects';
 
 const PREY_COUNT = 5;
