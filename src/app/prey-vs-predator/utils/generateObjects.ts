@@ -1,5 +1,11 @@
-import Predator, { PREDATOR_HEIGHT, PREDATOR_WIDTH } from '../objects/predator';
-import Prey, { PREY_HEIGHT, PREY_WIDTH } from '../objects/prey';
+import {
+    PREDATOR_HEIGHT,
+    PREDATOR_WIDTH,
+    PREY_HEIGHT,
+    PREY_WIDTH,
+} from '../constants/constants';
+import Predator from '../objects/predator';
+import Prey from '../objects/prey';
 
 async function generatePreys(
     amount: number,

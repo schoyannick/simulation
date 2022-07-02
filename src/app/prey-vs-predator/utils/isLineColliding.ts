@@ -1,5 +1,6 @@
+import { PREY_HEIGHT, PREY_WIDTH } from '../constants/constants';
 import Predator from '../objects/predator';
-import Prey, { PREY_HEIGHT, PREY_WIDTH } from '../objects/prey';
+import Prey from '../objects/prey';
 
 const isLineCollidingHelper = (
     startX: number,

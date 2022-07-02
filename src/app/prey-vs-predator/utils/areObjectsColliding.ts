@@ -1,13 +1,14 @@
+import { PREY_HEIGHT, PREY_WIDTH } from '../constants/constants';
 import Predator from '../objects/predator';
-import Prey, { PREY_HEIGHT, PREY_WIDTH } from '../objects/prey';
+import Prey from '../objects/prey';
 
 const areObjectsColliding = (
     x: number,
     y: number,
-    otherObjects: Array<Prey | Predator>
+    objects: Array<Prey | Predator>
 ): boolean => {
-    for (let i = 0; i < otherObjects.length; i++) {
-        const obj = otherObjects[i];
+    for (let i = 0; i < objects.length; i++) {
+        const obj = objects[i];
         if (
             x < obj.x + PREY_WIDTH &&
             x + PREY_WIDTH > obj.x &&

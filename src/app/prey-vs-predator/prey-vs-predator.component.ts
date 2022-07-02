@@ -1,15 +1,16 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
+import { PREY_WIDTH, PREY_HEIGHT } from './constants/constants';
 import EndScreen from './objects/endScreen';
 import Hud from './objects/hud';
 import Predator from './objects/predator';
-import Prey, { PREY_HEIGHT, PREY_WIDTH } from './objects/prey';
+import Prey from './objects/prey';
 import StartScreen from './objects/startScreen';
 import addDebugListener from './utils/addDebugListener';
 import { generatePredators, generatePreys } from './utils/generateObjects';
 
-const PREY_COUNT = 5;
-const PREDATOR_COUNT = 5;
+const PREY_COUNT = 10;
+const PREDATOR_COUNT = 3;
 
 enum SimulationState {
     initial,
@@ -175,7 +176,7 @@ export class PreyVsPredatorComponent implements OnInit {
             }
 
             this.preys.forEach((prey) => {
-                prey.update(deltaTime, this.width, this.height);
+                prey.update(deltaTime, this.width, this.height, this.predators);
             });
 
             this.predators.forEach((predator) => {
@@ -197,7 +198,7 @@ export class PreyVsPredatorComponent implements OnInit {
             }
             case SimulationState.running: {
                 this.preys.forEach((prey) => {
-                    prey.draw(this.ctx);
+                    prey.draw(this.ctx, this.predators);
                 });
 
                 this.predators.forEach((predator) => {

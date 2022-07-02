@@ -1,4 +1,4 @@
-export let isDebugModeEnabled = false;
+export let isDebugModeEnabled = true;
 
 function addDebugListener() {
     window.addEventListener('keydown', (event) => {

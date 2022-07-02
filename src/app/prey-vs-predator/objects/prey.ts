@@ -1,22 +1,28 @@
+import {
+    PREY_HEIGHT,
+    PREY_MAX_ENERGY,
+    PREY_SPEED,
+    PREY_SPLIT_TIME,
+    PREY_WIDTH,
+} from '../constants/constants';
+import { isDebugModeEnabled } from '../utils/addDebugListener';
 import { createPrey } from '../utils/createObject';
-import rotateVector from '../utils/rotateVector';
-
-export const PREY_WIDTH = 30;
-export const PREY_HEIGHT = 30;
-export const PREY_SPEED = 150;
-export const PREY_MAX_ENERGY = 80;
-export const PREY_SPLIT_TIME = 10;
+import isLineColliding from '../utils/isLineColliding';
+import Predator from './predator';
 
 class Prey {
     x: number;
     y: number;
-    vector: Array<number>;
     energy: number;
     image: HTMLImageElement;
     maxEnergy = PREY_MAX_ENERGY;
     isResting = false;
     splitTimer: number;
     maxSplitTimer = PREY_SPLIT_TIME;
+
+    angle: number;
+
+    rays: Array<Array<number>> = [];
 
     constructor(x: number, y: number, image: HTMLImageElement) {
         this.x = x;
@@ -26,30 +32,18 @@ class Prey {
         this.energy = PREY_MAX_ENERGY;
         this.splitTimer = PREY_SPLIT_TIME;
 
-        const randX = Math.random() * 2 - 1;
-        const randY = Math.random() * 2 - 1;
-        this.vector = [randX, randY];
+        this.angle = Math.floor(Math.random() * 360);
     }
 
-    update(deltaTime: number, width: number, height: number): void {
+    update(
+        deltaTime: number,
+        width: number,
+        height: number,
+        predators: Array<Predator>
+    ): void {
         if (!deltaTime) return;
 
-        this.splitTimer -= 1 / deltaTime;
-        if (this.splitTimer <= 0) {
-            const offsetX = Math.random() * 20 - 10;
-            const offsety = Math.random() * 20 - 10;
-            const x = Math.min(
-                Math.max(this.x + offsetX, PREY_WIDTH),
-                width - PREY_WIDTH
-            );
-            const y = Math.min(
-                Math.max(this.y + offsety, PREY_HEIGHT),
-                height - PREY_HEIGHT
-            );
-            createPrey(x, y, this.image);
-
-            this.splitTimer = PREY_SPLIT_TIME;
-        }
+        this.handleSplit(deltaTime, width, height);
 
         if (this.energy <= 0 && !this.isResting) {
             this.isResting = true;
@@ -66,10 +60,16 @@ class Prey {
         }
 
         this.energy -= 1 / deltaTime;
-
         const movement = (deltaTime / 1000) * PREY_SPEED;
-        const newX = this.x + this.vector[0] * movement;
-        const newY = this.y + this.vector[1] * movement;
+        const radiant = -this.angle * (Math.PI / 180);
+        const newX = this.x + Math.cos(radiant) * movement;
+        const newY = this.y + Math.sin(radiant) * movement;
+
+        this.calculateRays();
+
+        if (this.isInThreat(newX, newY, predators)) {
+            this.angle += 180 % 360;
+        }
 
         if (
             newX < 0 ||
@@ -77,26 +77,80 @@ class Prey {
             newY < 0 ||
             newY > height - PREY_HEIGHT
         ) {
-            this.x = Math.min(
-                Math.max(this.x + this.vector[0] * movement, 0),
-                width - PREY_WIDTH
-            );
-            this.y = Math.min(
-                Math.max(this.y + this.vector[1] * movement, 0),
-                height - PREY_HEIGHT
-            );
-            this.vector = rotateVector(
-                this.vector,
-                Math.floor(Math.random() * 360)
-            );
+            this.x = Math.min(Math.max(newX, 0), width - PREY_WIDTH);
+            this.y = Math.min(Math.max(newY, 0), height - PREY_HEIGHT);
+            this.angle = Math.floor(Math.random() * 360);
         } else {
             this.x = newX;
             this.y = newY;
         }
     }
 
-    draw(ctx: CanvasRenderingContext2D): void {
+    isInThreat(newX: number, newY: number, predators: Array<Predator>) {
+        return this.rays.some(([x, y]) => {
+            const startX = newX + PREY_WIDTH / 2;
+            const startY = newY + PREY_HEIGHT / 2;
+            return isLineColliding(startX, startY, x, y, predators);
+        });
+    }
+
+    calculateRays() {
+        this.rays = [];
+        const maxRays = 50;
+        for (
+            let angle = this.angle - maxRays / 2;
+            angle < this.angle + maxRays / 2;
+            angle = angle + 2
+        ) {
+            const radiant = -angle * (Math.PI / 180);
+            const newX = this.x + Math.cos(radiant) * 150;
+            const newY = this.y + Math.sin(radiant) * 150;
+            this.rays.push([newX, newY]);
+        }
+    }
+
+    draw(ctx: CanvasRenderingContext2D, predators: Array<Predator>): void {
         ctx.drawImage(this.image, this.x, this.y, PREY_WIDTH, PREY_HEIGHT);
+
+        if (isDebugModeEnabled) {
+            this.rays.forEach(([x, y]) => {
+                ctx.beginPath();
+                const startX = this.x + PREY_WIDTH / 2;
+                const startY = this.y + PREY_HEIGHT / 2;
+                const isColliding = isLineColliding(
+                    startX,
+                    startY,
+                    x,
+                    y,
+                    predators
+                );
+                ctx.strokeStyle = isColliding
+                    ? 'rgb(255, 0,0)'
+                    : 'rgb(0,255,0)';
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            });
+        }
+    }
+
+    handleSplit(deltaTime: number, width: number, height: number) {
+        this.splitTimer -= 1 / deltaTime;
+        if (this.splitTimer <= 0) {
+            const offsetX = Math.random() * 20 - 10;
+            const offsety = Math.random() * 20 - 10;
+            const x = Math.min(
+                Math.max(this.x + offsetX, PREY_WIDTH),
+                width - PREY_WIDTH
+            );
+            const y = Math.min(
+                Math.max(this.y + offsety, PREY_HEIGHT),
+                height - PREY_HEIGHT
+            );
+            createPrey(x, y, this.image);
+
+            this.splitTimer = PREY_SPLIT_TIME;
+        }
     }
 }
 
