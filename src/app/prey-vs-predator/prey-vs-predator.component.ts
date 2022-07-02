@@ -5,6 +5,7 @@ import Hud from './objects/hud';
 import Predator from './objects/predator';
 import Prey, { PREY_HEIGHT, PREY_WIDTH } from './objects/prey';
 import StartScreen from './objects/startScreen';
+import addDebugListener from './utils/addDebugListener';
 import { generatePredators, generatePreys } from './utils/generateObjects';
 
 const PREY_COUNT = 5;
@@ -61,6 +62,8 @@ export class PreyVsPredatorComponent implements OnInit {
 
         this.setCanvasDimensions();
         this.addClickListener();
+
+        addDebugListener();
 
         this.loop(0);
     }
