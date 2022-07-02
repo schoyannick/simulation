@@ -38,8 +38,7 @@ class Predator {
         this.energy = PREDATOR_MAX_ENERGY;
         this.splitTimer = PREDATOR_SPLIT_TIME;
 
-        // this.angle = Math.floor(Math.random() * 360);
-        this.angle = 0;
+        this.angle = Math.floor(Math.random() * 360);
     }
 
     update(
@@ -74,8 +73,8 @@ class Predator {
 
         const movement = (deltaTime / 1000) * PREDATOR_SPEED;
         const radiant = -this.angle * (Math.PI / 180);
-        const newX = this.x + Math.cos(radiant) * movement;
-        const newY = this.y + Math.sin(radiant) * movement;
+        const newX = Math.round(this.x + Math.cos(radiant) * movement);
+        const newY = Math.round(this.y + Math.sin(radiant) * movement);
 
         this.checkForKill(newX, newY, preys);
 

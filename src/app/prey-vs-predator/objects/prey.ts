@@ -64,8 +64,8 @@ class Prey {
         this.energy -= 1 / deltaTime;
         const movement = (deltaTime / 1000) * PREY_SPEED;
         const radiant = -this.angle * (Math.PI / 180);
-        const newX = this.x + Math.cos(radiant) * movement;
-        const newY = this.y + Math.sin(radiant) * movement;
+        const newX = Math.round(this.x + Math.cos(radiant) * movement);
+        const newY = Math.round(this.y + Math.sin(radiant) * movement);
 
         this.rays = calculateRays(this.angle, newX, newY);
 
