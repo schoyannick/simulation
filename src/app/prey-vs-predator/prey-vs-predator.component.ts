@@ -1,6 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
-import { PREY_WIDTH, PREY_HEIGHT } from './constants/constants';
+import {
+    PREY_WIDTH,
+    PREY_HEIGHT,
+    PREY_COUNT,
+    PREDATOR_COUNT,
+} from './constants/constants';
 import EndScreen from './objects/endScreen';
 import Hud from './objects/hud';
 import Predator from './objects/predator';
@@ -8,9 +13,6 @@ import Prey from './objects/prey';
 import StartScreen from './objects/startScreen';
 import addDebugListener from './utils/addDebugListener';
 import { generatePredators, generatePreys } from './utils/generateObjects';
-
-const PREY_COUNT = 10;
-const PREDATOR_COUNT = 10;
 
 enum SimulationState {
     initial,

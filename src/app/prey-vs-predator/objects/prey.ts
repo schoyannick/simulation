@@ -8,6 +8,7 @@ import {
 } from '../constants/constants';
 import { isDebugModeEnabled } from '../utils/addDebugListener';
 import { createPrey } from '../utils/createObject';
+import getRandomNumberInRange from '../utils/getRandomNumberInRange';
 import isLineColliding from '../utils/isLineColliding';
 import calculateRays from './calculateRays';
 import Predator from './predator';
@@ -70,7 +71,45 @@ class Prey {
         this.rays = calculateRays(this.angle, newX, newY);
 
         if (this.isInThreat(newX, newY, predators)) {
-            this.angle += 180 % 360;
+            debugger;
+            // 0 -> right = 90 or 270
+            // 90 -> top = 0 or 180
+            // 180 -> left = 90 or 270
+            // 270 -> bottom = 180 or 0
+            const useLowerRange = Math.random() >= 0.5;
+            if (this.angle <= 45 || this.angle >= 315) {
+                if (useLowerRange) {
+                    this.angle = getRandomNumberInRange(45, 135);
+                } else {
+                    this.angle = getRandomNumberInRange(225, 315);
+                }
+            } else if (this.angle >= 45 && this.angle <= 135) {
+                if (useLowerRange) {
+                    if (Math.random() >= 0.5) {
+                        this.angle = getRandomNumberInRange(315, 360);
+                    } else {
+                        this.angle = getRandomNumberInRange(0, 45);
+                    }
+                } else {
+                    this.angle = getRandomNumberInRange(225, 315);
+                }
+            } else if (this.angle >= 135 && this.angle <= 225) {
+                if (useLowerRange) {
+                    this.angle = getRandomNumberInRange(45, 135);
+                } else {
+                    this.angle = getRandomNumberInRange(225, 315);
+                }
+            } else {
+                if (useLowerRange) {
+                    if (Math.random() >= 0.5) {
+                        this.angle = getRandomNumberInRange(315, 360);
+                    } else {
+                        this.angle = getRandomNumberInRange(0, 45);
+                    }
+                } else {
+                    this.angle = getRandomNumberInRange(225, 315);
+                }
+            }
         }
 
         if (
