@@ -32,7 +32,10 @@ class Prey {
         this.y = y;
         this.image = image;
 
-        this.energy = PREY_MAX_ENERGY;
+        this.energy = getRandomNumberInRange(
+            PREY_MAX_ENERGY / 5,
+            PREY_MAX_ENERGY
+        );
         this.splitTimer = PREY_SPLIT_TIME;
 
         this.angle = Math.floor(Math.random() * 360);
@@ -48,30 +51,35 @@ class Prey {
 
         this.handleSplit(deltaTime, width, height);
 
-        if (this.energy <= 0 && !this.isResting) {
-            this.isResting = true;
-            return;
-        }
-
-        if (this.isResting && this.energy < this.maxEnergy) {
-            this.energy += 1 / deltaTime;
-            return;
-        }
-
-        if (this.isResting && this.energy >= this.maxEnergy) {
-            this.isResting = false;
-        }
-
         this.energy -= 1 / deltaTime;
         const movement = (deltaTime / 1000) * PREY_SPEED;
         const radiant = -this.angle * (Math.PI / 180);
         const newX = Math.round(this.x + Math.cos(radiant) * movement);
         const newY = Math.round(this.y + Math.sin(radiant) * movement);
 
+        const inThreat = this.isInThreat(newX, newY, predators);
+
+        if (this.energy <= 0 && !this.isResting) {
+            this.isResting = true;
+            return;
+        }
+
+        if (this.isResting && this.energy < this.maxEnergy) {
+            if (inThreat && this.energy > this.maxEnergy / 10) {
+                this.isResting = false;
+            } else {
+                this.energy += (1 / deltaTime) * 3;
+                return;
+            }
+        }
+
+        if (this.isResting && this.energy >= this.maxEnergy) {
+            this.isResting = false;
+        }
+
         this.rays = calculateRays(this.angle, newX, newY);
 
-        if (this.isInThreat(newX, newY, predators)) {
-            debugger;
+        if (inThreat) {
             // 0 -> right = 90 or 270
             // 90 -> top = 0 or 180
             // 180 -> left = 90 or 270

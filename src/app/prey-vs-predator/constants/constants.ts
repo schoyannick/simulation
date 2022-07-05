@@ -1,6 +1,6 @@
 export const PREY_WIDTH = 20;
 export const PREY_HEIGHT = 20;
-export const PREY_SPEED = 150;
+export const PREY_SPEED = 100;
 export const PREY_MAX_ENERGY = 80;
 export const PREY_SPLIT_TIME = 50;
 
