@@ -1,5 +1,4 @@
 const ROWS = 10;
-const COLS = 10;
 
 class Background {
     width: number = 0;
@@ -11,20 +10,20 @@ class Background {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        const darkColor = '	#d3d3d3';
+        const darkColor = '#d3d3d3';
         const lightColor = '#777B7E';
 
-        const row = Math.ceil(this.height / ROWS);
-        const col = Math.ceil(this.width / COLS);
+        const squareSize = Math.ceil(this.height / ROWS);
+        const cols = Math.ceil(this.width / squareSize);
         let color = darkColor;
 
-        for (let i = 0; i < ROWS; i++) {
-            for (let j = 0; j < COLS; j++) {
-                const x = i * col;
-                const y = j * row;
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < ROWS; j++) {
+                const x = i * squareSize;
+                const y = j * squareSize;
                 ctx.strokeStyle = color;
                 ctx.fillStyle = color;
-                ctx.fillRect(x, y, col, row);
+                ctx.fillRect(x, y, squareSize, squareSize);
                 color = color === darkColor ? lightColor : darkColor;
             }
             color = color === darkColor ? lightColor : darkColor;
