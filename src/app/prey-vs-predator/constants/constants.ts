@@ -32,7 +32,7 @@ export const PREDATOR_SPRITE_SHEET_POS = {
     left: {
         x: 1,
         y: 1,
-        width: 234,
+        width: 233,
         height: 159,
     },
     right: {

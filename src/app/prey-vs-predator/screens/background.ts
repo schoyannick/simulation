@@ -10,8 +10,8 @@ class Background {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        const darkColor = '#d3d3d3';
-        const lightColor = '#777B7E';
+        const darkColor = '#769656';
+        const lightColor = '#eeeed2';
 
         const squareSize = Math.ceil(this.height / ROWS);
         const cols = Math.ceil(this.width / squareSize);
