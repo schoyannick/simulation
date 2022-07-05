@@ -6,13 +6,14 @@ import {
     PREY_COUNT,
     PREDATOR_COUNT,
 } from './constants/constants';
-import EndScreen from './objects/endScreen';
+import EndScreen from './screens/endScreen';
 import Hud from './objects/hud';
 import Predator from './objects/predator';
 import Prey from './objects/prey';
-import StartScreen from './objects/startScreen';
+import StartScreen from './screens/startScreen';
 import addDebugListener from './utils/addDebugListener';
 import { generatePredators, generatePreys } from './utils/generateObjects';
+import Background from './screens/background';
 
 enum SimulationState {
     initial,
@@ -28,17 +29,21 @@ enum SimulationState {
 export class PreyVsPredatorComponent implements OnInit {
     @ViewChild('canvas')
     canvas!: ElementRef<HTMLCanvasElement>;
-
     ctx!: CanvasRenderingContext2D;
 
-    height = window.innerHeight - 20;
-    width = window.innerWidth - 40;
+    @ViewChild('backgroundCanvas')
+    backgroundCanvas!: ElementRef<HTMLCanvasElement>;
+    backgroundCtx!: CanvasRenderingContext2D;
+
+    height = window.innerHeight;
+    width = window.innerWidth;
 
     preys: Array<Prey> = [];
     predators: Array<Predator> = [];
 
     hud = new Hud();
 
+    background = new Background();
     startScreen = new StartScreen();
     endScreen = new EndScreen();
 
@@ -54,14 +59,33 @@ export class PreyVsPredatorComponent implements OnInit {
     createPreyObserver$!: Observable<CustomEvent>;
     createPredatorObserver$!: Observable<CustomEvent>;
 
+    spriteSheet: HTMLImageElement = new Image();
+
     ngOnInit() {
         this.initListener();
     }
 
     async ngAfterViewInit(): Promise<void> {
+        this.spriteSheet = new Image();
+        this.spriteSheet.src = '/assets/spritesheet.png';
+
+        const spriteSheetLoaded = new Promise<void>((res) => {
+            this.spriteSheet!.addEventListener('load', () => {
+                res();
+            });
+        });
+
+        await spriteSheetLoaded;
+
         this.ctx = this.canvas.nativeElement.getContext(
             '2d'
         ) as CanvasRenderingContext2D;
+
+        this.backgroundCtx = this.backgroundCanvas.nativeElement.getContext(
+            '2d'
+        ) as CanvasRenderingContext2D;
+
+        this.startScreen.spriteSheet = this.spriteSheet;
 
         this.setCanvasDimensions();
         this.addClickListener();
@@ -159,10 +183,16 @@ export class PreyVsPredatorComponent implements OnInit {
     }
 
     setCanvasDimensions(): void {
-        this.height = window.innerHeight - 20;
-        this.width = window.innerWidth - 40;
+        this.height = window.innerHeight;
+        this.width = window.innerWidth;
         this.canvas.nativeElement.height = this.height;
         this.canvas.nativeElement.width = this.width;
+
+        this.backgroundCanvas.nativeElement.height = window.innerHeight;
+        this.backgroundCanvas.nativeElement.width = window.innerWidth;
+
+        this.background.update(window.innerWidth, window.innerHeight);
+        this.background.draw(this.backgroundCtx);
     }
 
     update(deltaTime: number): void {
@@ -248,25 +278,19 @@ export class PreyVsPredatorComponent implements OnInit {
     }
 
     async generatePreysAndPredators(): Promise<void> {
-        const spriteSheet = new Image();
-        spriteSheet.src = '/assets/spritesheet.png';
-
-        const spriteSheetLoaded = new Promise<void>((res) => {
-            spriteSheet.addEventListener('load', () => {
-                res();
-            });
-        });
-
-        await spriteSheetLoaded;
-
         await Promise.all([
             generatePredators(
                 PREDATOR_COUNT,
                 this.width,
                 this.height,
-                spriteSheet
+                this.spriteSheet
             ),
-            generatePreys(PREY_COUNT, this.width, this.height, spriteSheet),
+            generatePreys(
+                PREY_COUNT,
+                this.width,
+                this.height,
+                this.spriteSheet
+            ),
         ]).then(([predators, preys]) => {
             this.preys.push(...preys);
             this.predators.push(...predators);
