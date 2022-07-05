@@ -249,6 +249,16 @@ export class PreyVsPredatorComponent implements OnInit {
                 break;
             }
             case SimulationState.ended: {
+                this.preys.forEach((prey) => {
+                    prey.draw(this.ctx, this.predators);
+                });
+
+                this.predators.forEach((predator) => {
+                    predator.draw(this.ctx, this.preys);
+                });
+
+                this.hud.draw(this.ctx);
+
                 this.endScreen.draw(this.ctx, this.width, this.height);
                 break;
             }
