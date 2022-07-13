@@ -35,14 +35,6 @@ export class PixiComponent implements AfterViewInit {
     resizeOberserver$!: Observable<Event>;
 
     async ngAfterViewInit(): Promise<void> {
-        var spritesheet = require('spritesheet-js');
-
-        spritesheet('assets/*.png', { format: 'json' }, function (err: any) {
-            if (err) throw err;
-
-            console.log('spritesheet successfully generated');
-        });
-
         this.initListener();
 
         this.app = new PIXI.Application({
