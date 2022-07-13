@@ -20,7 +20,11 @@ export type Predator = PIXI.Sprite & {
     rays: Array<Array<number>>;
 };
 
-const getPredator = (): Predator => {
+const getPredator = (
+    x: number,
+    y: number,
+    spriteSheet: PIXI.Spritesheet
+): Predator => {
     const predator = PIXI.Sprite.from('/assets/prey.png') as Predator;
 
     return predator;

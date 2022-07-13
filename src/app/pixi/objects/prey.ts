@@ -33,20 +33,29 @@ export type Prey = PIXI.Sprite & {
     rays: Array<Array<number>>;
 };
 
-const getPrey = (): Prey => {
-    const prey = PIXI.Sprite.from('/assets/prey.png') as Prey;
+const getPrey = (x: number, y: number, spriteSheet: PIXI.Spritesheet): Prey => {
+    const moveDirection = Math.floor(Math.random() * 360);
+    const imageName =
+        moveDirection <= 90 || moveDirection >= 270 ? 'preyRight' : 'preyLeft';
+
+    const prey = new PIXI.Sprite(
+        spriteSheet.textures[`${imageName}.png`]
+    ) as Prey;
 
     prey.width = PREY_WIDTH;
     prey.height = PREY_HEIGHT;
 
     prey.energy = getRandomNumberInRange(PREY_MAX_ENERGY / 5, PREY_MAX_ENERGY);
     prey.splitTimer = PREY_SPLIT_TIME;
-    prey.moveDirection = Math.floor(Math.random() * 360);
+    prey.moveDirection = moveDirection;
 
     prey.rays = [];
     prey.maxEnergy = PREY_MAX_ENERGY;
     prey.isResting = false;
     prey.maxSplitTimer = PREY_SPLIT_TIME;
+
+    prey.x = x;
+    prey.y = y;
 
     function handleSplit(deltaTime: number, width: number, height: number) {
         prey.splitTimer -= 1 / deltaTime;
@@ -85,6 +94,7 @@ const getPrey = (): Prey => {
         height: number,
         predators: Array<Predator>
     ) => {
+        const prevMoveDirection = prey.moveDirection;
         handleSplit(deltaTime, width, height);
 
         prey.energy -= 1 / (deltaTime * 16);
@@ -167,6 +177,15 @@ const getPrey = (): Prey => {
             prey.moveDirection = Math.floor(Math.random() * 360);
         } else {
             prey.position.set(newX, newY);
+        }
+
+        if (prevMoveDirection !== prey.moveDirection) {
+            const updatedImage =
+                prey.moveDirection <= 90 || prey.moveDirection >= 270
+                    ? 'preyRight'
+                    : 'preyLeft';
+
+            prey.texture = spriteSheet.textures[`${updatedImage}.png`];
         }
     };
 

@@ -1,10 +1,14 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import { fromEvent, Observable } from 'rxjs';
+
+import { PREY_COUNT } from '../prey-vs-predator/constants/constants';
+import { isDebugModeEnabled } from '../prey-vs-predator/utils/addDebugListener';
 import { Predator } from './objects/predator';
 import getPrey, { Prey } from './objects/prey';
 import { Rays } from './objects/rays';
 import { Background } from './screens/background';
+import { generatePreys } from './utils/generateObjects';
 
 @Component({
     selector: 'app-pixi',
@@ -68,7 +72,7 @@ export class PixiComponent implements AfterViewInit {
 
         const { width, height } = this.app.view;
 
-        this.preys.push(getPrey());
+        this.generateObjects();
 
         this.preys.forEach((prey) => {
             this.app.stage.addChild(prey);
@@ -78,15 +82,19 @@ export class PixiComponent implements AfterViewInit {
             );
         });
 
-        // let time = 0;
-        // this.app.ticker.add((deltaTime: number) => {
-        //     time += deltaTime;
-        //     if (time > 5) {
-        //         this.rays.update(this.preys);
-        //         time = 0;
-        //     }
-        // });
+        this.app.ticker.add(() => {
+            if (isDebugModeEnabled) {
+                this.rays.update(this.preys);
+            }
+        });
     }
 
-    generateObjects() {}
+    generateObjects() {
+        this.preys = generatePreys(
+            PREY_COUNT,
+            this.app.view.width,
+            this.app.view.height,
+            this.spriteSheet
+        );
+    }
 }
