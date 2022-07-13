@@ -2,13 +2,16 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import { fromEvent, Observable } from 'rxjs';
 
-import { PREY_COUNT } from '../prey-vs-predator/constants/constants';
+import {
+    PREDATOR_COUNT,
+    PREY_COUNT,
+} from '../prey-vs-predator/constants/constants';
 import { isDebugModeEnabled } from '../prey-vs-predator/utils/addDebugListener';
 import { Predator } from './objects/predator';
 import getPrey, { Prey } from './objects/prey';
 import { Rays } from './objects/rays';
 import { Background } from './screens/background';
-import { generatePreys } from './utils/generateObjects';
+import { generatePredators, generatePreys } from './utils/generateObjects';
 
 @Component({
     selector: 'app-pixi',
@@ -32,6 +35,14 @@ export class PixiComponent implements AfterViewInit {
     resizeOberserver$!: Observable<Event>;
 
     async ngAfterViewInit(): Promise<void> {
+        var spritesheet = require('spritesheet-js');
+
+        spritesheet('assets/*.png', { format: 'json' }, function (err: any) {
+            if (err) throw err;
+
+            console.log('spritesheet successfully generated');
+        });
+
         this.initListener();
 
         this.app = new PIXI.Application({
@@ -70,9 +81,19 @@ export class PixiComponent implements AfterViewInit {
         this.app.stage.addChild(this.background);
         this.app.stage.addChild(this.rays);
 
-        const { width, height } = this.app.view;
-
         this.generateObjects();
+
+        this.updateObjects();
+
+        this.app.ticker.add(() => {
+            if (isDebugModeEnabled) {
+                this.rays.update(this.preys);
+            }
+        });
+    }
+
+    updateObjects() {
+        const { width, height } = this.app.view;
 
         this.preys.forEach((prey) => {
             this.app.stage.addChild(prey);
@@ -82,16 +103,25 @@ export class PixiComponent implements AfterViewInit {
             );
         });
 
-        this.app.ticker.add(() => {
-            if (isDebugModeEnabled) {
-                this.rays.update(this.preys);
-            }
+        this.predators.forEach((predator) => {
+            this.app.stage.addChild(predator);
+
+            this.app.ticker.add((deltaTime: number) =>
+                predator.update(deltaTime, width, height, this.preys)
+            );
         });
     }
 
     generateObjects() {
         this.preys = generatePreys(
             PREY_COUNT,
+            this.app.view.width,
+            this.app.view.height,
+            this.spriteSheet
+        );
+
+        this.predators = generatePredators(
+            PREDATOR_COUNT,
             this.app.view.width,
             this.app.view.height,
             this.spriteSheet

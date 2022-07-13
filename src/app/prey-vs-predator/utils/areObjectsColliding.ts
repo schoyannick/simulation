@@ -5,7 +5,7 @@ import Prey from '../objects/prey';
 const areObjectsColliding = (
     x: number,
     y: number,
-    objects: Array<Prey | Predator>
+    objects: Array<any>
 ): boolean => {
     for (let i = 0; i < objects.length; i++) {
         const obj = objects[i];

@@ -18,12 +18,6 @@ export type Prey = PIXI.Sprite & {
         height: number,
         predators: Array<Predator>
     ): void;
-    drawRays(
-        deltaTime: number,
-        width: number,
-        height: number,
-        predators: Array<Predator>
-    ): void;
     moveDirection: number;
     energy: number;
     maxEnergy: number;
