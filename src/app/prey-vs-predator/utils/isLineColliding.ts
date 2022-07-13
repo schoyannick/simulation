@@ -30,7 +30,7 @@ const isLineColliding = (
     startY: number,
     endX: number,
     endY: number,
-    objects: Array<Prey | Predator>
+    objects: Array<any>
 ): number => {
     for (let i = 0; i < objects.length; i++) {
         const obj = objects[i];
