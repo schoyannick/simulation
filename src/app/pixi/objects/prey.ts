@@ -5,10 +5,11 @@ import {
     PREY_SPEED,
     PREY_SPLIT_TIME,
     PREY_WIDTH,
-} from 'src/app/prey-vs-predator/constants/constants';
-import calculateRays from 'src/app/prey-vs-predator/objects/calculateRays';
-import getRandomNumberInRange from 'src/app/prey-vs-predator/utils/getRandomNumberInRange';
-import isLineColliding from 'src/app/prey-vs-predator/utils/isLineColliding';
+} from 'src/app/pixi/constants/constants';
+import calculateRays from '../utils/calculateRays';
+import { createPrey } from '../utils/createObject';
+import getRandomNumberInRange from '../utils/getRandomNumberInRange';
+import isLineColliding from '../utils/isLineColliding';
 import { Predator } from './predator';
 
 export type Prey = PIXI.Sprite & {
@@ -52,7 +53,7 @@ const getPrey = (x: number, y: number, spriteSheet: PIXI.Spritesheet): Prey => {
     prey.y = y;
 
     function handleSplit(deltaTime: number, width: number, height: number) {
-        prey.splitTimer -= 1 / deltaTime;
+        prey.splitTimer -= 1 / (deltaTime * 16);
         if (prey.splitTimer <= 0) {
             const offsetX = Math.random() * 20 - 10;
             const offsety = Math.random() * 20 - 10;
@@ -64,7 +65,7 @@ const getPrey = (x: number, y: number, spriteSheet: PIXI.Spritesheet): Prey => {
                 Math.max(prey.y + offsety, PREY_HEIGHT),
                 height - PREY_HEIGHT
             );
-            // createPrey(x, y, prey.image);
+            createPrey(x, y);
 
             prey.splitTimer = PREY_SPLIT_TIME;
         }

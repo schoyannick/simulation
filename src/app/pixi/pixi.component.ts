@@ -2,15 +2,13 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import { fromEvent, Observable } from 'rxjs';
 
-import {
-    PREDATOR_COUNT,
-    PREY_COUNT,
-} from '../prey-vs-predator/constants/constants';
-import { isDebugModeEnabled } from '../prey-vs-predator/utils/addDebugListener';
-import { Predator } from './objects/predator';
+import { PREDATOR_COUNT, PREY_COUNT } from './constants/constants';
+import getPredator, { Predator } from './objects/predator';
 import getPrey, { Prey } from './objects/prey';
 import { Rays } from './objects/rays';
 import { Background } from './screens/background';
+import { SimulationState } from './types/simulationState';
+import addDebugListener, { isDebugModeEnabled } from './utils/addDebugListener';
 import { generatePredators, generatePreys } from './utils/generateObjects';
 
 @Component({
@@ -34,6 +32,14 @@ export class PixiComponent implements AfterViewInit {
 
     resizeOberserver$!: Observable<Event>;
 
+    destroyPreyObserver$!: Observable<CustomEvent>;
+    destroyPredatorObserver$!: Observable<CustomEvent>;
+
+    createPreyObserver$!: Observable<CustomEvent>;
+    createPredatorObserver$!: Observable<CustomEvent>;
+
+    simulationState = SimulationState.initial;
+
     async ngAfterViewInit(): Promise<void> {
         this.initListener();
 
@@ -54,18 +60,47 @@ export class PixiComponent implements AfterViewInit {
             });
         });
 
-        this.generateObjects();
-
         this.initGameLoop();
 
         this.background.update(this.app.view.width, this.app.view.height);
     }
 
     initListener() {
+        addDebugListener();
+
         this.resizeOberserver$ = fromEvent(window, 'resize');
         this.resizeOberserver$.subscribe(() => {
             this.app.resizeTo = window;
             this.background.update(this.app.view.width, this.app.view.height);
+        });
+
+        this.createPreyObserver$ = fromEvent<CustomEvent>(window, 'createPrey');
+        this.createPreyObserver$.subscribe((event) => {
+            this.createPrey(event.detail);
+        });
+
+        this.createPredatorObserver$ = fromEvent<CustomEvent>(
+            window,
+            'createPredator'
+        );
+        this.createPredatorObserver$.subscribe((event) => {
+            this.createPredator(event.detail);
+        });
+
+        this.destroyPreyObserver$ = fromEvent<CustomEvent>(
+            window,
+            'destroyPrey'
+        );
+        this.destroyPreyObserver$.subscribe((event) => {
+            this.destroyPrey(event.detail);
+        });
+
+        this.destroyPredatorObserver$ = fromEvent<CustomEvent>(
+            window,
+            'destroyPredator'
+        );
+        this.destroyPredatorObserver$.subscribe((event) => {
+            this.destroyPredator(event.detail);
         });
     }
 
@@ -75,48 +110,78 @@ export class PixiComponent implements AfterViewInit {
 
         this.generateObjects();
 
-        this.updateObjects();
+        const { width, height } = this.app.view;
 
-        this.app.ticker.add(() => {
+        this.app.ticker.add((deltaTime) => {
+            this.preys.forEach((prey) => {
+                prey.update(deltaTime, width, height, this.predators);
+            });
+
+            this.predators.forEach((predator) => {
+                predator.update(deltaTime, width, height, this.preys);
+            });
+
             if (isDebugModeEnabled) {
-                this.rays.update(this.preys);
+                this.rays.clearDrawing();
+                this.rays.update(this.preys, this.predators);
+                this.rays.update(this.predators, this.preys);
+            } else {
+                this.rays.clearDrawing();
             }
         });
     }
 
-    updateObjects() {
-        const { width, height } = this.app.view;
-
-        this.preys.forEach((prey) => {
-            this.app.stage.addChild(prey);
-
-            this.app.ticker.add((deltaTime: number) =>
-                prey.update(deltaTime, width, height, this.predators)
+    generateObjects() {
+        if (this.simulationState === SimulationState.running) {
+            this.preys = generatePreys(
+                PREY_COUNT,
+                this.app.view.width,
+                this.app.view.height,
+                this.spriteSheet
             );
-        });
 
-        this.predators.forEach((predator) => {
-            this.app.stage.addChild(predator);
-
-            this.app.ticker.add((deltaTime: number) =>
-                predator.update(deltaTime, width, height, this.preys)
+            this.predators = generatePredators(
+                PREDATOR_COUNT,
+                this.app.view.width,
+                this.app.view.height,
+                this.spriteSheet
             );
-        });
+
+            this.preys.forEach((prey) => {
+                this.app.stage.addChild(prey);
+            });
+
+            this.predators.forEach((predator) => {
+                this.app.stage.addChild(predator);
+            });
+        }
     }
 
-    generateObjects() {
-        this.preys = generatePreys(
-            PREY_COUNT,
-            this.app.view.width,
-            this.app.view.height,
-            this.spriteSheet
-        );
+    createPrey({ x, y }: { x: number; y: number }) {
+        const prey = getPrey(x, y, this.spriteSheet);
+        this.preys.push(prey);
 
-        this.predators = generatePredators(
-            PREDATOR_COUNT,
-            this.app.view.width,
-            this.app.view.height,
-            this.spriteSheet
+        this.app.stage.addChild(prey);
+    }
+
+    createPredator({ x, y }: { x: number; y: number }) {
+        const predator = getPredator(x, y, this.spriteSheet);
+        this.predators.push(predator);
+
+        this.app.stage.addChild(predator);
+    }
+
+    destroyPrey(prey: Prey) {
+        this.app.stage.removeChild(prey);
+
+        this.preys = this.preys.filter((current) => current !== prey);
+    }
+
+    destroyPredator(predator: Predator) {
+        this.app.stage.removeChild(predator);
+
+        this.predators = this.predators.filter(
+            (current) => current !== predator
         );
     }
 }

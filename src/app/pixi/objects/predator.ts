@@ -9,11 +9,13 @@ import {
     PREY_MAX_ENERGY,
     PREY_SPLIT_TIME,
     PREY_WIDTH,
-} from 'src/app/prey-vs-predator/constants/constants';
-import calculateRays from 'src/app/prey-vs-predator/objects/calculateRays';
-import areObjectsColliding from 'src/app/prey-vs-predator/utils/areObjectsColliding';
-import getRandomNumberInRange from 'src/app/prey-vs-predator/utils/getRandomNumberInRange';
-import isLineColliding from 'src/app/prey-vs-predator/utils/isLineColliding';
+} from 'src/app/pixi/constants/constants';
+import calculateRays from 'src/app/pixi/utils/calculateRays';
+import areObjectsColliding from '../utils/areObjectsColliding';
+import { createPredator } from '../utils/createObject';
+import { destroyPredator, destroyPrey } from '../utils/destroyObject';
+import getRandomNumberInRange from '../utils/getRandomNumberInRange';
+import isLineColliding from '../utils/isLineColliding';
 import { Prey } from './prey';
 
 export type Predator = PIXI.Sprite & {
@@ -75,7 +77,7 @@ const getPredator = (
 
         predator.energy -= 1 / (deltaTime * 16);
         if (predator.energy <= 0) {
-            // destroyPredator(predator);
+            destroyPredator(predator);
             return;
         }
 
@@ -90,19 +92,19 @@ const getPredator = (
                 Math.max(predator.y + offsety, PREDATOR_HEIGHT),
                 height - PREDATOR_HEIGHT
             );
-            // createPredator(x, y, predator.image);
+            createPredator(x, y);
 
             predator.splitTimer = PREDATOR_SPLIT_TIME;
         }
 
-        const movement = (deltaTime / 1000) * PREDATOR_SPEED;
-        const radiant = -predator.angle * (Math.PI / 180);
+        const movement = (deltaTime / 60) * PREDATOR_SPEED;
+        const radiant = -predator.moveDirection * (Math.PI / 180);
         const newX = Math.round(predator.x + Math.cos(radiant) * movement);
         const newY = Math.round(predator.y + Math.sin(radiant) * movement);
 
         checkForKill(newX, newY, preys);
 
-        predator.rays = calculateRays(predator.angle, newX, newY);
+        predator.rays = calculateRays(predator.moveDirection, newX, newY);
 
         targetPrey(newX, newY, preys);
 
@@ -114,7 +116,7 @@ const getPredator = (
         ) {
             predator.x = Math.min(Math.max(newX, 0), width - PREDATOR_WIDTH);
             predator.y = Math.min(Math.max(newY, 0), height - PREDATOR_HEIGHT);
-            predator.angle = Math.floor(Math.random() * 360);
+            predator.moveDirection = Math.floor(Math.random() * 360);
         } else {
             predator.x = newX;
             predator.y = newY;
@@ -123,9 +125,8 @@ const getPredator = (
         if (prevMoveDirection !== predator.moveDirection) {
             const updatedImage =
                 predator.moveDirection <= 90 || predator.moveDirection >= 270
-                    ? 'preyRight'
-                    : 'preyLeft';
-
+                    ? 'predatorRight'
+                    : 'predatorLeft';
             predator.texture = spriteSheet.textures[`${updatedImage}.png`];
         }
     };
@@ -147,7 +148,7 @@ const getPredator = (
                 } else {
                     radiant = 2 * Math.PI - radiant;
                 }
-                predator.angle = radiant * (180 / Math.PI);
+                predator.moveDirection = radiant * (180 / Math.PI);
                 return;
             }
         }
@@ -158,7 +159,7 @@ const getPredator = (
         preys.forEach((prey) => {
             if (areObjectsColliding(x, y, [prey])) {
                 killCount++;
-                // destroyPrey(prey);
+                destroyPrey(prey);
             }
         });
 

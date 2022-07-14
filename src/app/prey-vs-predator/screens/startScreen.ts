@@ -1,7 +1,7 @@
 import {
     PREDATOR_SPRITE_SHEET_POS,
     PREY_SPRITE_SHEET_POS,
-} from '../constants/constants';
+} from '../../pixi/constants/constants';
 
 class StartScreen {
     startButton = {

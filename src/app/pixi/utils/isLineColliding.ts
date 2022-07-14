@@ -1,6 +1,7 @@
-import { PREY_HEIGHT, PREY_WIDTH } from '../constants/constants';
-import Predator from '../objects/predator';
-import Prey from '../objects/prey';
+import {
+    PREY_HEIGHT,
+    PREY_WIDTH,
+} from 'src/app/pixi/constants/constants';
 
 const isLineCollidingHelper = (
     startX: number,

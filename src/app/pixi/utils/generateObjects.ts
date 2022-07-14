@@ -5,7 +5,7 @@ import {
     PREDATOR_WIDTH,
     PREY_HEIGHT,
     PREY_WIDTH,
-} from 'src/app/prey-vs-predator/constants/constants';
+} from 'src/app/pixi/constants/constants';
 import getPredator, { Predator } from '../objects/predator';
 import getPrey, { Prey } from '../objects/prey';
 

@@ -10,7 +10,7 @@
 },
 "predatorRight.png":
 {
-	"frame": {"x":234,"y":1,"w":231,"h":158},
+	"frame": {"x":1,"y":161,"w":231,"h":158},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":231,"h":158},
@@ -18,7 +18,7 @@
 },
 "preyLeft.png":
 {
-	"frame": {"x":467,"y":1,"w":231,"h":158},
+	"frame": {"x":234,"y":1,"w":231,"h":158},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":231,"h":158},
@@ -26,7 +26,7 @@
 },
 "preyRight.png":
 {
-	"frame": {"x":700,"y":1,"w":231,"h":158},
+	"frame": {"x":234,"y":161,"w":231,"h":158},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":231,"h":158},

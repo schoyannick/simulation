@@ -5,15 +5,12 @@ import {
     PREY_HEIGHT,
     PREY_COUNT,
     PREDATOR_COUNT,
-} from './constants/constants';
+} from '../pixi/constants/constants';
 import EndScreen from './screens/endScreen';
 import Hud from './objects/hud';
 import Predator from './objects/predator';
 import Prey from './objects/prey';
 import StartScreen from './screens/startScreen';
-import addDebugListener from './utils/addDebugListener';
-import { generatePredators, generatePreys } from './utils/generateObjects';
-import Background from './screens/background';
 
 enum SimulationState {
     initial,
@@ -43,7 +40,6 @@ export class PreyVsPredatorComponent implements OnInit {
 
     hud = new Hud();
 
-    background = new Background();
     startScreen = new StartScreen();
     endScreen = new EndScreen();
 
@@ -61,9 +57,7 @@ export class PreyVsPredatorComponent implements OnInit {
 
     spriteSheet: HTMLImageElement = new Image();
 
-    ngOnInit() {
-        this.initListener();
-    }
+    ngOnInit() {}
 
     async ngAfterViewInit(): Promise<void> {
         this.spriteSheet = new Image();
@@ -87,48 +81,9 @@ export class PreyVsPredatorComponent implements OnInit {
 
         this.startScreen.spriteSheet = this.spriteSheet;
 
-        this.setCanvasDimensions();
         this.addClickListener();
 
-        addDebugListener();
-
         this.loop(0);
-    }
-
-    initListener() {
-        this.resizeOberserver$ = fromEvent(window, 'resize');
-        this.resizeOberserver$.subscribe(() => {
-            this.setCanvasDimensions();
-        });
-
-        this.createPreyObserver$ = fromEvent<CustomEvent>(window, 'createPrey');
-        this.createPreyObserver$.subscribe((event) => {
-            this.createPrey(event.detail);
-        });
-
-        this.createPredatorObserver$ = fromEvent<CustomEvent>(
-            window,
-            'createPredator'
-        );
-        this.createPredatorObserver$.subscribe((event) => {
-            this.createPredator(event.detail);
-        });
-
-        this.destroyPreyObserver$ = fromEvent<CustomEvent>(
-            window,
-            'destroyPrey'
-        );
-        this.destroyPreyObserver$.subscribe((event) => {
-            this.destroyPrey(event.detail);
-        });
-
-        this.destroyPredatorObserver$ = fromEvent<CustomEvent>(
-            window,
-            'destroyPredator'
-        );
-        this.destroyPredatorObserver$.subscribe((event) => {
-            this.destroyPredator(event.detail);
-        });
     }
 
     addClickListener() {
@@ -180,19 +135,6 @@ export class PreyVsPredatorComponent implements OnInit {
         this.draw();
 
         requestAnimationFrame(this.loop.bind(this));
-    }
-
-    setCanvasDimensions(): void {
-        this.height = window.innerHeight;
-        this.width = window.innerWidth;
-        this.canvas.nativeElement.height = this.height;
-        this.canvas.nativeElement.width = this.width;
-
-        this.backgroundCanvas.nativeElement.height = window.innerHeight;
-        this.backgroundCanvas.nativeElement.width = window.innerWidth;
-
-        this.background.update(window.innerWidth, window.innerHeight);
-        this.background.draw(this.backgroundCtx);
     }
 
     update(deltaTime: number): void {
@@ -287,25 +229,7 @@ export class PreyVsPredatorComponent implements OnInit {
         );
     }
 
-    async generatePreysAndPredators(): Promise<void> {
-        await Promise.all([
-            generatePredators(
-                PREDATOR_COUNT,
-                this.width,
-                this.height,
-                this.spriteSheet
-            ),
-            generatePreys(
-                PREY_COUNT,
-                this.width,
-                this.height,
-                this.spriteSheet
-            ),
-        ]).then(([predators, preys]) => {
-            this.preys.push(...preys);
-            this.predators.push(...predators);
-        });
-    }
+    async generatePreysAndPredators(): Promise<void> {}
 
     getShownButtonPos(): {
         x: number;

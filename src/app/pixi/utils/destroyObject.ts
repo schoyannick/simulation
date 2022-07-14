@@ -1,5 +1,5 @@
-import Predator from '../objects/predator';
-import Prey from '../objects/prey';
+import { Predator } from '../objects/predator';
+import { Prey } from '../objects/prey';
 
 function destroyPrey(object: Prey) {
     const event = new CustomEvent('destroyPrey', {
